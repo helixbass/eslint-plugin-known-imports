@@ -1,0 +1,27 @@
+{
+  "name": "eslint-plugin-known-imports",
+  "version": "0.0.0-development",
+  "description": "ESLint plugin to generate missing known imports",
+  "main": "index.js",
+  "repository": "https://github.com/helixbass/eslint-plugin-known-imports",
+  "author": "Julian Rosse <julian@helixbass.net> (http://helixbass.net/)",
+  "license": "MIT",
+  "scripts": {
+    "lint": "eslint .",
+    "test": "mocha tests/**/*.js"
+  },
+  "keywords": [
+    "eslint",
+    "eslint-plugin",
+    "eslintplugin"
+  ],
+  "peerDependencies": {
+    "eslint": ">=0.8.0"
+  },
+  "devDependencies": {
+    "eslint": "^5.2.0",
+    "eslint-config-prettier": "^2.9.0",
+    "eslint-plugin-prettier": "^2.6.2",
+    "mocha": "^5.2.0"
+  }
+}
