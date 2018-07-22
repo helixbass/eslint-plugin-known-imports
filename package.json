@@ -1,7 +1,7 @@
 {
   "name": "eslint-plugin-known-imports",
   "version": "0.0.1",
-  "description": "ESLint plugin to generate missing known imports",
+  "description": "ESLint plugin to generate missing project-specific known imports",
   "main": "index.js",
   "repository": "https://github.com/helixbass/eslint-plugin-known-imports",
   "author": "Julian Rosse <julian@helixbass.net> (http://helixbass.net/)",

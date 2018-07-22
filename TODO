@@ -1,0 +1,2 @@
+- don't put only import before eg 'use strict' directive
+- if it's a local import and there are no existing local imports, should leave a preceding blank line
