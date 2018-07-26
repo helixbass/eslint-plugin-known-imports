@@ -2,15 +2,18 @@ module.exports = {
   rules: {
     'no-undef': require('./lib/rules/no-undef'),
     'jsx-no-undef': require('./lib/rules/jsx-no-undef'),
+    'no-unused-vars': require('./lib/rules/no-unused-vars'),
   },
   configs: {
     recommended: {
       plugins: ['known-imports'],
       rules: {
-        'no-undef': 0,
-        'known-imports/no-undef': 2,
-        'react/jsx-no-undef': 0,
-        'known-imports/jsx-no-undef': 2,
+        'no-undef': 'off',
+        'known-imports/no-undef': 'error',
+        'react/jsx-no-undef': 'off',
+        'known-imports/jsx-no-undef': 'error',
+        'no-unused-vars': 'off',
+        'known-imports/no-unused-vars': 'error',
       },
     },
   },
