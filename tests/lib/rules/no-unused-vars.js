@@ -46,6 +46,7 @@ ruleTester.run('no-unused-vars', rule, {
       output: `\
         export const a = 1;`,
       errors: [definedError('x')],
+      options: [{onlyRemoveKnownImports: false}],
     },
     {
       code: `\
@@ -54,6 +55,7 @@ ruleTester.run('no-unused-vars', rule, {
       output: `\
         export const a = 1;`,
       errors: [definedError('x')],
+      options: [{onlyRemoveKnownImports: false}],
     },
     {
       code: `\
@@ -63,6 +65,7 @@ ruleTester.run('no-unused-vars', rule, {
         import {y} from "y";
         export {y};`,
       errors: [definedError('x')],
+      options: [{onlyRemoveKnownImports: false}],
     },
     {
       code: `\
@@ -72,6 +75,7 @@ ruleTester.run('no-unused-vars', rule, {
         import {w, y} from "y";
         export {w, y};`,
       errors: [definedError('x')],
+      options: [{onlyRemoveKnownImports: false}],
     },
     {
       code: `\
@@ -81,6 +85,7 @@ ruleTester.run('no-unused-vars', rule, {
         import {w} from "y";
         export {w};`,
       errors: [definedError('x')],
+      options: [{onlyRemoveKnownImports: false}],
     },
     {
       code: `\
@@ -90,6 +95,7 @@ ruleTester.run('no-unused-vars', rule, {
         import {w} from "y";
         export {w};`,
       errors: [definedError('x')],
+      options: [{onlyRemoveKnownImports: false}],
     },
     {
       code: `\
@@ -99,6 +105,7 @@ ruleTester.run('no-unused-vars', rule, {
         import w from "y";
         export {w};`,
       errors: [definedError('x')],
+      options: [{onlyRemoveKnownImports: false}],
     },
     {
       code: `\
@@ -108,6 +115,7 @@ ruleTester.run('no-unused-vars', rule, {
         import w from "y";
         export {w};`,
       errors: [definedError('x')],
+      options: [{onlyRemoveKnownImports: false}],
     },
     {
       code: `\
@@ -117,6 +125,7 @@ ruleTester.run('no-unused-vars', rule, {
         import {w, z} from "y";
         export {w, z};`,
       errors: [definedError('x')],
+      options: [{onlyRemoveKnownImports: false}],
     },
     {
       code: `\
@@ -126,6 +135,7 @@ ruleTester.run('no-unused-vars', rule, {
         import {z} from "y";
         export {z};`,
       errors: [definedError('x')],
+      options: [{onlyRemoveKnownImports: false}],
     },
     {
       code: `\
@@ -135,6 +145,7 @@ ruleTester.run('no-unused-vars', rule, {
         import {z} from "y";
         export {z};`,
       errors: [definedError('x')],
+      options: [{onlyRemoveKnownImports: false}],
     },
     {
       code: `\
@@ -144,6 +155,35 @@ ruleTester.run('no-unused-vars', rule, {
         import {w} from "y";
         export {w};`,
       errors: [definedError('x')],
+      options: [{onlyRemoveKnownImports: false}],
+    },
+    {
+      code: `\
+        import View from "react-native";
+        export const a = 1;`,
+      output: `\
+        export const a = 1;`,
+      errors: [definedError('View')],
+      options: [{onlyRemoveKnownImports: true}],
+    },
+    {
+      code: `\
+        import x from "y";
+        export const a = 1;`,
+      output: `\
+        import x from "y";
+        export const a = 1;`,
+      errors: [definedError('x')],
+      options: [{onlyRemoveKnownImports: true}],
+    },
+    {
+      code: `\
+        import {map as fmap} from "lodash/fp";
+        export const a = 1;`,
+      output: `\
+        export const a = 1;`,
+      errors: [definedError('fmap')],
+      options: [{onlyRemoveKnownImports: true}],
     },
   ],
 })
