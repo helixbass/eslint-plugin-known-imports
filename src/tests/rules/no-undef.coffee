@@ -247,4 +247,35 @@ ruleTester.run 'no-undef', rule,
       type: 'Identifier'
     ]
     options: [knownImportsFile: 'other-known-imports.json']
+  ,
+    code: '''
+      "use strict"
+
+      fmap(x => x)
+    '''
+    output: """
+      "use strict"
+
+      import {map as fmap} from 'lodash/fp'
+
+      fmap(x => x)
+    """
+    errors: [message: "'fmap' is not defined.", type: 'Identifier']
+  ,
+    code: """
+      import {filter as ffilter} from 'lodash/fp'
+
+      withExtractedNavParams()
+    """
+    output: """
+      import {filter as ffilter} from 'lodash/fp'
+
+      import {withExtractedNavParams} from 'utils/navigation'
+
+      withExtractedNavParams()
+    """
+    errors: [
+      message: "'withExtractedNavParams' is not defined."
+      type: 'Identifier'
+    ]
   ]

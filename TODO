@@ -1,5 +1,3 @@
-- don't put only import before eg 'use strict' directive
-- if it's a local import and there are no existing local imports, should leave a preceding blank line
 - does it break to turn off a react/ rule if plugin: react isn't on?
 - support require()?
 - include existing tests of "base rules"

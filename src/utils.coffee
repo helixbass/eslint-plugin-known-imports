@@ -81,17 +81,30 @@ getAddImportFix = ({
       return appendOnlyNamedImport()
     lastExistingImport = do ->
       return null unless allImports.length
-      return last allImports if knownImport.local
       lastNonlocalImport.found ?= allImports.find ({range}) ->
         followingChars = sourceCode.text[range[1]...(range[1] + 2)]
         followingChars is '\n\n'
+      return last allImports if knownImport.local
       return lastNonlocalImport.found if lastNonlocalImport.found?
       last allImports
     insertNewImport = (text) ->
-      return fixer.insertTextAfter lastExistingImport, "\n#{text}" if (
+      return fixer.insertTextAfter(
         lastExistingImport
-      )
-      firstProgramToken = sourceCode.getFirstToken sourceCode.ast
+        "\n#{
+          if knownImport.local
+            onlyExistingNonlocalImports =
+              lastNonlocalImport.found is last allImports
+            if onlyExistingNonlocalImports
+              '\n'
+            else
+              ''
+          else
+            ''
+        }#{text}"
+      ) if lastExistingImport
+      firstProgramToken = sourceCode.getFirstToken sourceCode.ast,
+        # skip directives
+        filter: ({type}) -> type isnt 'String'
       fixer.insertTextBefore firstProgramToken, "#{text}\n\n"
     insertNewImport(
       "import #{
