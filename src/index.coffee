@@ -1,9 +1,9 @@
 module.exports =
   rules:
-    'no-undef': require './lib/rules/no-undef'
-    'jsx-no-undef': require './lib/rules/jsx-no-undef'
-    'no-unused-vars': require './lib/rules/no-unused-vars'
-    'react-in-jsx-scope': require './lib/rules/react-in-jsx-scope'
+    'no-undef': require './rules/no-undef'
+    'jsx-no-undef': require './rules/jsx-no-undef'
+    'no-unused-vars': require './rules/no-unused-vars'
+    'react-in-jsx-scope': require './rules/react-in-jsx-scope'
   configs:
     recommended:
       plugins: ['known-imports']
