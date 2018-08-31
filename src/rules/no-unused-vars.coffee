@@ -526,7 +526,8 @@ module.exports =
       def = unusedVar.defs[0]
       return null unless def.type is 'ImportBinding'
       return null if (
-        config.onlyRemoveKnownImports and not knownImports[unusedVar.name]
+        config.onlyRemoveKnownImports and
+        not knownImports.imports[unusedVar.name]
       )
 
       importDeclaration = def.parent

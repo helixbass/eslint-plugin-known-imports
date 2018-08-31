@@ -35,15 +35,17 @@ module.exports =
       properties:
         typeof:
           type: 'boolean'
+        knownImports:
+          type: 'object'
       additionalProperties: no
     ]
     fixable: 'code'
 
   create: (context) ->
-    options = context.options[0]
-    considerTypeOf = !!(options?.typeof is yes)
+    options = context.options[0] ? {}
+    considerTypeOf = options.typeof is yes
 
-    knownImports = loadKnownImports()
+    knownImports = loadKnownImports fromConfig: options.knownImports
     allImports = []
     lastNonlocalImport = {}
 

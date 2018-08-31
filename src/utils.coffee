@@ -1,17 +1,38 @@
 fs = require 'fs'
-{last, isString} = require 'lodash'
-{filter: ffilter} = require 'lodash/fp'
+{last, isString, mergeWith} = require 'lodash'
+{filter: ffilter, mapValues: fmapValues} = require 'lodash/fp'
 
-loadKnownImports = ->
-  for filename in [
-    'known-imports.yaml'
-    'known-imports.yml'
-    'known-imports.json'
-  ] when fs.existsSync(filename)
-    file = fs.readFileSync filename
-    return JSON.parse file if /\.json$/.test filename
-    return require('js-yaml').safeLoad file
-  null
+normalizeKnownImports = (knownImports) ->
+  return knownImports if knownImports.imports
+  imports: knownImports
+
+# allKnownImportsKeys = ['imports']
+
+normalizeKnownImportValue = (value) ->
+  return module: value if isString value
+  value
+
+mergeKnownImportsField = (objValue, srcValue, key) ->
+  normalizeKnownImportValues = fmapValues normalizeKnownImportValue
+  return {
+    ...normalizeKnownImportValues(objValue ? {})
+    ...normalizeKnownImportValues(srcValue ? {})
+  } if key is 'imports'
+  return
+
+loadKnownImports = ({fromConfig = {}} = {}) ->
+  fromFile = normalizeKnownImports do ->
+    for filename in [
+      'known-imports.yaml'
+      'known-imports.yml'
+      'known-imports.json'
+    ] when fs.existsSync(filename)
+      file = fs.readFileSync filename
+      return JSON.parse file if /\.json$/.test filename
+      return require('js-yaml').safeLoad file
+    {}
+  fromConfig = normalizeKnownImports fromConfig
+  mergeWith fromFile, fromConfig, mergeKnownImportsField
 
 getAddImportFix = ({
   knownImports
@@ -20,11 +41,10 @@ getAddImportFix = ({
   allImports
   lastNonlocalImport
 }) ->
-  knownImport = knownImports?[name]
+  knownImport = knownImports.imports[name]
   return null unless knownImport
 
   sourceCode = context.getSourceCode()
-  knownImport = module: knownImport if isString knownImport
   importName = "#{
     if knownImport.name then "#{knownImport.name} as " else ''
   }#{name}"

@@ -115,4 +115,31 @@ ruleTester.run 'no-undef', rule,
       message: "'withExtractedNavParams' is not defined."
       type: 'Identifier'
     ]
+  ,
+    code: """
+      import {filter as ffilter} from 'lodash/fp'
+
+      import local from 'local'
+
+      localFromConfig()
+    """
+    output: """
+      import {filter as ffilter} from 'lodash/fp'
+
+      import local from 'local'
+      import localFromConfig from '../localFromConfig'
+
+      localFromConfig()
+    """
+    errors: [
+      message: "'localFromConfig' is not defined."
+      type: 'Identifier'
+    ]
+    options: [
+      knownImports:
+        localFromConfig:
+          module: '../localFromConfig'
+          default: yes
+          local: yes
+    ]
   ]
