@@ -41,7 +41,6 @@ You tell the plugin which imports should be auto-generated when you use certain 
 ```
 Then you provide a `known-imports.json` or `known-imports.yaml` file in the project root directory, see the next section for its format
 ## Specifying known imports
-#### Example
 Here's an example `known-imports.json` that may give you the idea:
 ```
 {
@@ -64,7 +63,7 @@ would generate:
 ```
 import {View} from 'react-native'
 ```
-There's also a shorthand:
+There's also an equivalent shorthand:
 ```
 "View": "react-native"
 ```
