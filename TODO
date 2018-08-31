@@ -1,2 +1,13 @@
 - don't put only import before eg 'use strict' directive
 - if it's a local import and there are no existing local imports, should leave a preceding blank line
+- does it break to turn off a react/ rule if plugin: react isn't on?
+- support require()?
+- include existing tests of "base rules"
+- maybe belongs in other plugin: try and be smart enough to detect that the unused var is part of an object dereferencing and can be safely removed?
+- figure out how to release without committing lib/
+
+config:
+- support yaml
+- allow specifying config "inline" in eslintrc
+- put under "imports" key in known-imports
+- merge multiple sources intelligently

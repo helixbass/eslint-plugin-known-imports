@@ -1,12 +1,14 @@
-env:
-  es6: true
-  node: true
-parserOptions:
-  ecmaVersion: 6
-  ecmaFeatures:
-    jsx: true
-extends:
-  - eslint:recommended
-  - prettier
 plugins:
   - prettier
+  - coffee
+extends:
+  - plugin:coffee/all
+rules:
+  no-unused-vars: error
+  no-undef: error
+  prettier/prettier: [error, {parser: coffeescript, pluginSearchDirs: [.]}]
+  prefer-destructuring: [error, {object: true}]
+  no-console: error
+  no-unreachable: error
+env:
+  node: true
