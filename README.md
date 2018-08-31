@@ -1,9 +1,11 @@
-ESLint-plugin-known-imports
+eslint-plugin-known-imports
 ===========================
 
-Generates missing project-specific known imports by overriding ESLint rules `no-undef` and `react/jsx-no-undef`
+Let ESLint automatically write and remove ES6 `import` statements for you
 
-# Installation
+![known-imports-demo](https://user-images.githubusercontent.com/440230/44939205-6bf56280-ad51-11e8-880a-95fa2c94c824.gif)
+
+## Installation
 
 Install [ESLint](https://www.github.com/eslint/eslint) either locally or globally.
 
@@ -11,19 +13,35 @@ Install [ESLint](https://www.github.com/eslint/eslint) either locally or globall
 $ npm install eslint --save-dev
 ```
 
-If you installed `ESLint` globally, you have to install known-imports plugin globally too. Otherwise, install it locally.
+If you installed `eslint` globally, you have to install known-imports plugin globally too. Otherwise, install it locally.
 
 ```sh
 $ npm install eslint-plugin-known-imports --save-dev
 ```
 
-# Specifying "known" imports
+## How does it work?
 
-The plugin works by adding ESLint "fixing" capabilities that generate `import` statements whenever you reference
-an unknown variable that you've specified in a `known-imports.json` file in your project root directory (technically,
-whichever directory ESLint is run from)
+#### eslint --fix
+You have to be running ESLint in "fix" mode (in your editor, or with `--fix` on the command line)
 
-### Example
+The plugin provides enhanced versions of existing ESLint rules like `no-undef` and `no-unused-vars`
+#### Describe your known imports
+You tell the plugin which imports should be auto-generated when you use certain names in your code, typically by providing a `known-imports.json` or `known-imports.yaml` file in your project root directory
+
+## Typical ESLint config
+#### For a React project:
+```
+"plugins": ["known-imports", ...],
+"extends: ["plugin:known-imports/recommended-react", ...]
+```
+#### For a non-React project:
+```
+"plugins": ["known-imports", ...],
+"extends: ["plugin:known-imports/recommended", ...]
+```
+Then you provide a `known-imports.json` or `known-imports.yaml` file in the project root directory, see the next section for its format
+## Specifying known imports
+#### Example
 Here's an example `known-imports.json` that may give you the idea:
 ```
 {
@@ -35,23 +53,23 @@ Here's an example `known-imports.json` that may give you the idea:
 }
 ```
 
-### `known-imports.json` format
+The keys are the names used in your code (that would be reported as unknown by `no-undef` or `react/jsx-no-undef`)
 
-The keys are the names (that would be reported by `no-undef` or `react/jsx-no-undef`). If the value is a string,
-that's shorthand for specifying the `module`, eg the first one above could be written
+#### Named (non-default) imports
+Just specify the `module` you're importing the name from:
 ```
 "View": {"module": "react-native"}
 ```
-The "default" is a named import (which would be imported as eg `import {View} from 'react-native'`). To generate a
-`default` import, specify `"default": true`. So eg this:
-```
-"moment": {"module": "moment", "default": true}
-```
 would generate:
 ```
-import moment from 'moment'
+import {View} from 'react-native'
 ```
-To specify a named import alias, use `"name": "originalName"`, eg this:
+There's also a shorthand:
+```
+"View": "react-native"
+```
+#### Aliases
+Add `"name": "originalName"`:
 ```
 "fmap": {"module": "lodash/fp", "name": "map"}
 ```
@@ -59,6 +77,16 @@ would generate:
 ```
 import {map as fmap} from 'lodash/fp'
 ```
+#### Default imports
+Add `"default": true`:
+```
+"moment": {"module": "moment", "default": true}
+```
+would generate:
+```
+import moment from 'moment'
+```
+
 A convention is assumed where non-project-local imports come first, followed by a blank line and then project-local imports.
 By default a known import is considered non-local and the `import` statement will be generated at the end of the existing
 non-local imports. If you specify `"local": true`, the `import` statement will be generated at the end of the existing
@@ -66,7 +94,7 @@ local imports (if any).
 
 It should detect existing imports from the same module and append to the existing `import` statement
 
-# Configuration
+## Configuration
 
 Use [our preset](#recommended) to get reasonable defaults:
 
@@ -96,12 +124,12 @@ If not using the recommended preset, enable the rules that you would like to use
   }
 ```
 
-# List of supported rules
+## List of supported rules
 
 * known-imports/no-undef: see docs for [`no-undef`](https://eslint.org/docs/rules/no-undef)
 * known-imports/jsx-no-undef: see docs for [`jsx-no-undef`](https://github.com/yannickcr/eslint-plugin-react/blob/master/docs/rules/jsx-no-undef.md)
 
-# Shareable configurations
+## Shareable configurations
 
 ## Recommended
 
