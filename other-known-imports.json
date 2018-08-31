@@ -1,1 +1,4 @@
-{"fmap": "somewhere-else"}
+{
+  "fmap": "somewhere-else",
+  "Text": {"module": "somewhere-else", "default": true}
+}

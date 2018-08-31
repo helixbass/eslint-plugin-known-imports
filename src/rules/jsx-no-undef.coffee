@@ -27,7 +27,13 @@ module.exports =
       recommended: yes
     schema: [
       type: 'object'
-      properties: allowGlobals: type: 'boolean'
+      properties:
+        allowGlobals:
+          type: 'boolean'
+        knownImports:
+          type: 'object'
+        knownImportsFile:
+          type: 'string'
       additionalProperties: no
     ]
     fixable: 'code'
@@ -35,6 +41,11 @@ module.exports =
   create: (context) ->
     config = context.options[0] or {}
     allowGlobals = config.allowGlobals or no
+    knownImports = null
+    lazyLoadKnownImports = ->
+      knownImports ?= loadKnownImports(
+        fromConfig: config.knownImports, configFilePath: config.knownImportsFile
+      )
 
     ###*
     # Compare an identifier with the variables declared in the scope
@@ -73,7 +84,7 @@ module.exports =
         node
         message: "'#{node.name}' is not defined."
         fix: getFix {
-          knownImports
+          knownImports: lazyLoadKnownImports()
           name: node.name
           context
           allImports
@@ -81,7 +92,6 @@ module.exports =
         }
       }
 
-    knownImports = loadKnownImports()
     allImports = []
     lastNonlocalImport = {}
 

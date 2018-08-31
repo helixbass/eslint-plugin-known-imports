@@ -195,6 +195,39 @@ ruleTester.run 'no-unused-vars', rule,
     errors: [definedError 'fmap']
     options: [onlyRemoveKnownImports: yes]
   ,
+    # respect knownImportsFile config
+    code: """
+      import numeral from "numeral";
+      export const a = 1;
+    """
+    output: """
+      import numeral from "numeral";
+      export const a = 1;
+    """
+    errors: [definedError 'numeral']
+    options: [
+      onlyRemoveKnownImports: yes, knownImportsFile: 'other-known-imports.json'
+    ]
+  ,
+    # respect inline knownImports
+    code: """
+      import numeral from "numeral";
+      export const a = 1;
+    """
+    output: """
+      export const a = 1;
+    """
+    errors: [definedError 'numeral']
+    options: [
+      onlyRemoveKnownImports: yes
+      knownImportsFile: 'other-known-imports.json'
+      knownImports:
+        numeral:
+          module: 'numeral'
+          default: yes
+    ]
+  ,
+    # preserve blank line
     code: """
       import b from "b";
       import c from "c";
@@ -212,6 +245,7 @@ ruleTester.run 'no-unused-vars', rule,
     """
     errors: [definedError 'c']
   ,
+    # ...but not at the beginning of the file
     code: """
       import c from "c";
 
