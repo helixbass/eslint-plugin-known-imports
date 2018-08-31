@@ -535,7 +535,19 @@ module.exports =
       (fixer) ->
         removeEntireImport = ->
           nextToken = sourceCode.getTokenAfter importDeclaration
-          fixer.removeRange [importDeclaration.range[0], nextToken.range[0]]
+          nextTokenIsPrecededByBlankLine =
+            sourceCode.text[(nextToken.range[0] - 2)...nextToken.range[0]] is
+            '\n\n'
+          importIsAtBeginningOfFile = not sourceCode.getTokenBefore(
+            importDeclaration
+          )
+          fixer.removeRange [
+            importDeclaration.range[0]
+            if nextTokenIsPrecededByBlankLine and not importIsAtBeginningOfFile
+              nextToken.range[0] - 1
+            else
+              nextToken.range[0]
+          ]
 
         removeThroughFollowingComma = ({commaToken}) ->
           followingToken = sourceCode.getTokenAfter commaToken

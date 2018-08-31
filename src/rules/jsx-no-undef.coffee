@@ -5,7 +5,7 @@
 
 'use strict'
 
-{loadKnownImports, getFix} = require '../utils'
+{loadKnownImports, getAddImportFix: getFix} = require '../utils'
 
 ###*
 # Checks if a node name match the JSX tag convention.

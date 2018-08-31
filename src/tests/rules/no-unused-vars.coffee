@@ -211,4 +211,18 @@ ruleTester.run 'no-unused-vars', rule,
       export const a = b + someLocalDependency;
     """
     errors: [definedError 'c']
+  ,
+    code: """
+      import c from "c";
+
+      import someLocalDependency from "../somewhere";
+
+      export const a = someLocalDependency;
+    """
+    output: """
+      import someLocalDependency from "../somewhere";
+
+      export const a = someLocalDependency;
+    """
+    errors: [definedError 'c']
   ]

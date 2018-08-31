@@ -1,4 +1,6 @@
 fs = require 'fs'
+{last, isString} = require 'lodash'
+{filter: ffilter} = require 'lodash/fp'
 
 loadKnownImports = ->
   knownImportsFilename = 'known-imports.json'
@@ -6,50 +8,65 @@ loadKnownImports = ->
 
   JSON.parse fs.readFileSync knownImportsFilename
 
-getFix = ({knownImports, name, context, allImports, lastNonlocalImport}) ->
+getAddImportFix = ({
+  knownImports
+  name
+  context
+  allImports
+  lastNonlocalImport
+}) ->
   knownImport = knownImports?[name]
-  unless knownImport then return null
+  return null unless knownImport
 
   sourceCode = context.getSourceCode()
-  if typeof knownImport is 'string' then knownImport = module: knownImport
+  knownImport = module: knownImport if isString knownImport
   importName = "#{
     if knownImport.name then "#{knownImport.name} as " else ''
   }#{name}"
   (fixer) ->
+    prependDefaultImport = ->
+      # TODO: check that there's not already a default import?
+      leadingBrace = sourceCode.getTokenBefore existingImport.specifiers[0]
+      fixer.insertTextBefore leadingBrace, "#{importName}, "
+
+    appendToExistingNamedImports = ->
+      fixer.insertTextAfter(
+        last namedImports
+        ", #{importName}" # TODO: detect whether already has a trailing comma?
+      )
+
+    appendOnlyNamedImport = ->
+      fixer.insertTextAfter lastSpecifier, ", {#{importName}}"
+
     existingImport = allImports.find ({source}) ->
       source.value is knownImport.module
     if existingImport
-      if knownImport.default
-        leadingBrace = sourceCode.getTokenBefore existingImport.specifiers[0]
-        return fixer.insertTextBefore leadingBrace, "#{importName}, "
-      namedImports = existingImport.specifiers.filter ({type}) ->
-        type is 'ImportSpecifier'
-      if namedImports.length
-        lastNamedImport = namedImports[namedImports.length - 1]
-        return fixer.insertTextAfter(
-          lastNamedImport
-          ", #{importName}" # TODO: detect whether already has a trailing comma?
-        )
-      lastSpecifier =
-        existingImport.specifiers[existingImport.specifiers.length - 1]
-      return fixer.insertTextAfter lastSpecifier, ", {#{importName}}"
+      return prependDefaultImport() if knownImport.default
+      namedImports = ffilter(type: 'ImportSpecifier') existingImport.specifiers
+      return appendToExistingNamedImports() if namedImports.length
+      lastSpecifier = last existingImport.specifiers
+      return appendOnlyNamedImport()
     lastExistingImport = do ->
       return null unless allImports.length
-      return allImports[allImports.length - 1] if knownImport.local
+      return last allImports if knownImport.local
       lastNonlocalImport.found ?= allImports.find ({range}) ->
-        followingChars = sourceCode.text.slice range[1], range[1] + 2
+        followingChars = sourceCode.text[range[1]...(range[1] + 2)]
         followingChars is '\n\n'
       return lastNonlocalImport.found if lastNonlocalImport.found?
-      allImports[allImports.length - 1]
+      last allImports
     insertNewImport = (text) ->
       return fixer.insertTextAfter lastExistingImport, "\n#{text}" if (
         lastExistingImport
       )
       firstProgramToken = sourceCode.getFirstToken sourceCode.ast
       fixer.insertTextBefore firstProgramToken, "#{text}\n\n"
-    return insertNewImport(
-      "import #{importName} from '#{knownImport.module}'"
-    ) if knownImport.default
-    insertNewImport "import {#{importName}} from '#{knownImport.module}'"
+    insertNewImport(
+      "import #{
+        if knownImport.default
+          importName
+        else
+          "{#{importName}}"
+      } from '#{knownImport.module}'"
+    )
 
-module.exports = {loadKnownImports, getFix}
+module.exports = {loadKnownImports, getAddImportFix}
