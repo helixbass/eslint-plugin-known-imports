@@ -20,16 +20,24 @@ mergeKnownImportsField = (objValue, srcValue, key) ->
   } if key is 'imports'
   return
 
-loadKnownImports = ({fromConfig = {}} = {}) ->
+loadConfigFile = (filename) ->
+  file = fs.readFileSync filename
+  return JSON.parse file if /\.json$/.test filename
+  return require('js-yaml').safeLoad file
+
+loadKnownImports = ({fromConfig = {}, configFilePath} = {}) ->
   fromFile = normalizeKnownImports do ->
+    if configFilePath
+      throw new Error(
+        "Couldn't load known imports file '#{configFilePath}'"
+      ) unless fs.existsSync configFilePath
+      return loadConfigFile configFilePath
     for filename in [
       'known-imports.yaml'
       'known-imports.yml'
       'known-imports.json'
     ] when fs.existsSync(filename)
-      file = fs.readFileSync filename
-      return JSON.parse file if /\.json$/.test filename
-      return require('js-yaml').safeLoad file
+      return loadConfigFile filename
     {}
   fromConfig = normalizeKnownImports fromConfig
   mergeWith fromFile, fromConfig, mergeKnownImportsField

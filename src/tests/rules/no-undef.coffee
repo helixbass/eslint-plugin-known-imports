@@ -116,6 +116,7 @@ ruleTester.run 'no-undef', rule,
       type: 'Identifier'
     ]
   ,
+    # uses eslintrc config
     code: """
       import {filter as ffilter} from 'lodash/fp'
 
@@ -142,4 +143,108 @@ ruleTester.run 'no-undef', rule,
           default: yes
           local: yes
     ]
+  ,
+    # merges eslintrc config
+    code: """
+      import {filter as ffilter} from 'lodash/fp'
+
+      import local from 'local'
+
+      fmap(localFromConfig())
+    """
+    output: """
+      import {filter as ffilter, map as fmap} from 'lodash/fp'
+
+      import local from 'local'
+      import localFromConfig from '../localFromConfig'
+
+      fmap(localFromConfig())
+    """
+    errors: [
+      message: "'fmap' is not defined."
+      type: 'Identifier'
+    ,
+      message: "'localFromConfig' is not defined."
+      type: 'Identifier'
+    ]
+    options: [
+      knownImports:
+        localFromConfig:
+          module: '../localFromConfig'
+          default: yes
+          local: yes
+    ]
+  ,
+    # eslintrc config fully overrides known import
+    code: """
+      import {filter as ffilter} from 'lodash/fp'
+
+      import local from 'local'
+
+      numeral(1)
+    """
+    output: """
+      import {filter as ffilter} from 'lodash/fp'
+      import {numeral} from 'other-numeral'
+
+      import local from 'local'
+
+      numeral(1)
+    """
+    errors: [
+      message: "'numeral' is not defined."
+      type: 'Identifier'
+    ]
+    options: [
+      knownImports:
+        numeral:
+          module: 'other-numeral'
+    ]
+  ,
+    # ...and when using shorthand
+    code: """
+      import {filter as ffilter} from 'lodash/fp'
+
+      import local from 'local'
+
+      numeral(1)
+    """
+    output: """
+      import {filter as ffilter} from 'lodash/fp'
+      import {numeral} from 'other-numeral'
+
+      import local from 'local'
+
+      numeral(1)
+    """
+    errors: [
+      message: "'numeral' is not defined."
+      type: 'Identifier'
+    ]
+    options: [
+      knownImports:
+        numeral: 'other-numeral'
+    ]
+  ,
+    # accepts path to known-imports config
+    code: """
+      import {filter as ffilter} from 'lodash/fp'
+
+      import local from 'local'
+
+      fmap(1)
+    """
+    output: """
+      import {filter as ffilter} from 'lodash/fp'
+      import {fmap} from 'somewhere-else'
+
+      import local from 'local'
+
+      fmap(1)
+    """
+    errors: [
+      message: "'fmap' is not defined."
+      type: 'Identifier'
+    ]
+    options: [knownImportsFile: 'other-known-imports.json']
   ]

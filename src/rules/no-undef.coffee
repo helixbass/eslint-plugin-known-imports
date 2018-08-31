@@ -37,6 +37,8 @@ module.exports =
           type: 'boolean'
         knownImports:
           type: 'object'
+        knownImportsFile:
+          type: 'string'
       additionalProperties: no
     ]
     fixable: 'code'
@@ -45,7 +47,9 @@ module.exports =
     options = context.options[0] ? {}
     considerTypeOf = options.typeof is yes
 
-    knownImports = loadKnownImports fromConfig: options.knownImports
+    knownImports = loadKnownImports(
+      fromConfig: options.knownImports, configFilePath: options.knownImportsFile
+    )
     allImports = []
     lastNonlocalImport = {}
 

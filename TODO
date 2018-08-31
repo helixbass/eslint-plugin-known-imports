@@ -5,9 +5,3 @@
 - include existing tests of "base rules"
 - maybe belongs in other plugin: try and be smart enough to detect that the unused var is part of an object dereferencing and can be safely removed?
 - figure out how to release without committing lib/
-
-config:
-- support yaml
-- allow specifying config "inline" in eslintrc
-- put under "imports" key in known-imports
-- merge multiple sources intelligently
