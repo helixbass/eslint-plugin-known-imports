@@ -10,6 +10,7 @@ rules:
   prettier/prettier: [error, {parser: coffeescript, pluginSearchDirs: [.]}]
   prefer-destructuring: [error, {object: true}]
   no-console: error
-  no-unreachable: error
+  coffee/no-unused-expressions: off
+  coffee/no-magic-numbers: off
 env:
   node: true

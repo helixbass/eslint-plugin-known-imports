@@ -2,14 +2,15 @@
   "name": "eslint-plugin-known-imports",
   "version": "0.0.5",
   "description": "ESLint plugin to generate missing/remove unused project-specific known imports",
-  "main": "index.js",
+  "main": "lib/index.js",
   "repository": "https://github.com/helixbass/eslint-plugin-known-imports",
   "author": "Julian Rosse <julian@helixbass.net> (http://helixbass.net/)",
   "license": "MIT",
   "scripts": {
     "lint": "eslint src/*.coffee src/*/*.coffee",
     "test": "mocha lib/tests/**/*.js",
-    "watch": "coffee -o lib/ -wc src/"
+    "watch": "coffee -o lib/ -wc src/",
+    "prepublish": "coffee -o lib/ -c src/"
   },
   "keywords": [
     "eslint",
@@ -20,13 +21,14 @@
     "eslint": ">=0.8.0"
   },
   "devDependencies": {
+    "coffeescript": "github:helixbass/coffeescript#d2bada7",
     "eslint": "^5.2.0",
     "eslint-config-prettier": "^2.9.0",
-    "eslint-plugin-coffee": "^0.0.4",
+    "eslint-plugin-coffee": "^0.0.7",
     "eslint-plugin-prettier": "^2.6.2",
     "mocha": "^5.2.0",
     "prettier": "github:helixbass/prettier#f5366a54",
-    "prettier-plugin-coffeescript": "^0.0.2"
+    "prettier-plugin-coffeescript": "^0.0.4"
   },
   "dependencies": {
     "eslint-plugin-react": "^7.10.0",

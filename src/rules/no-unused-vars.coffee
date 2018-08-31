@@ -100,7 +100,6 @@ module.exports =
       knownImports ?= loadKnownImports(
         fromConfig: config.knownImports, configFilePath: config.knownImportsFile
       )
-      console.log {knownImports, config}
       knownImports
 
     ###*
