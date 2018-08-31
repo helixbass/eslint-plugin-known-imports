@@ -1,7 +1,0 @@
-{
-  "View": "react-native",
-  "fmap": {"module": "lodash/fp", "name": "map"},
-  "numeral": {"module": "numeral", "default": true},
-  "Text": {"module": "components/Text", "default": true, "local": true},
-  "withExtractedNavParams": {"module": "utils/navigation", "local": true}
-}

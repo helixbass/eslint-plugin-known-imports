@@ -3,10 +3,15 @@ fs = require 'fs'
 {filter: ffilter} = require 'lodash/fp'
 
 loadKnownImports = ->
-  knownImportsFilename = 'known-imports.json'
-  return null unless fs.existsSync knownImportsFilename
-
-  JSON.parse fs.readFileSync knownImportsFilename
+  for filename in [
+    'known-imports.yaml'
+    'known-imports.yml'
+    'known-imports.json'
+  ] when fs.existsSync(filename)
+    file = fs.readFileSync filename
+    return JSON.parse file if /\.json$/.test filename
+    return require('js-yaml').safeLoad file
+  null
 
 getAddImportFix = ({
   knownImports

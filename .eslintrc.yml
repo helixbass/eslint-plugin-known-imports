@@ -4,8 +4,9 @@ plugins:
 extends:
   - plugin:coffee/all
 rules:
-  no-unused-vars: error
-  no-undef: error
+  no-unused-vars: &err
+    - error
+  no-undef: *err
   prettier/prettier: [error, {parser: coffeescript, pluginSearchDirs: [.]}]
   prefer-destructuring: [error, {object: true}]
   no-console: error
