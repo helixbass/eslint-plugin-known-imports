@@ -85,13 +85,12 @@ would generate:
 ```
 import moment from 'moment'
 ```
-
-A convention is assumed where non-project-local imports come first, followed by a blank line and then project-local imports.
-By default a known import is considered non-local and the `import` statement will be generated at the end of the existing
-non-local imports. If you specify `"local": true`, the `import` statement will be generated at the end of the existing
-local imports (if any).
-
-It should detect existing imports from the same module and append to the existing `import` statement
+#### Local imports
+Add `"local": true` to distinguish project-local imports eg:
+```
+"MySharedComponent": {"module": "components/MySharedComponent", "default": true, "local": true}
+```
+You only need to distinguish local imports if you want to follow the convention where nonlocal imports come first, followed by a blank line and then local imports
 
 ## Configuration
 
