@@ -92,57 +92,26 @@ Add `"local": true` to distinguish project-local imports eg:
 ```
 You only need to distinguish local imports if you want to follow the convention where nonlocal imports come first, followed by a blank line and then local imports
 
-## Configuration
+## ESLint configuration in depth
+If you don't want to use the `plugin:known-imports/recommended` or `plugin:known-imports/recommended-react` presets, you can specify rules individually in your `.eslintrc`
 
-Use [our preset](#recommended) to get reasonable defaults:
-
-```json
-  "extends": [
-    "eslint:recommended",
-    "plugin:known-imports/recommended"
-  ]
+To avoid duplicate warnings, you'll always want to disable the existing ESLint rule that the plugin rule enhances, eg
 ```
-
-Add "known-imports" to the plugins section.
-
-```json
-  "plugins": [
-    "known-imports"
-  ]
+"rules": {
+  "no-undef": "off",
+  "known-imports/no-undef": "error"
+}
 ```
-
-If not using the recommended preset, enable the rules that you would like to use and disable their corresponding "base" rules.
-
-```json
-  "rules": {
-    "no-undef": "off",
-    "known-imports/no-undef": "error",
-    "react/jsx-no-undef": "off",
-    "known-imports/jsx-no-undef": "error",
-  }
+The ESLint rules provided by the plugin are:
+#### `known-imports/no-unused-vars` (enhances [`no-unused-vars`](https://eslint.org/docs/rules/no-unused-vars#disallow-unused-variables-no-unused-vars))
+By default this rule removes any unused `import` that it finds. To restrict it to only remove known imports, set `"onlyRemoveKnownImports": true` eg
 ```
-
-## List of supported rules
-
-* known-imports/no-undef: see docs for [`no-undef`](https://eslint.org/docs/rules/no-undef)
-* known-imports/jsx-no-undef: see docs for [`jsx-no-undef`](https://github.com/yannickcr/eslint-plugin-react/blob/master/docs/rules/jsx-no-undef.md)
-
-## Shareable configurations
-
-## Recommended
-
-This plugin exports a `recommended` configuration that includes overrides of both `no-undef` and `react/jsx-no-undef`
-
-To enable this configuration use the `extends` property in your `.eslintrc` config file:
-
-```json
-{
-  "extends": ["eslint:recommended", "plugin:known-imports/recommended"]
+"rules": {
+  "no-unused-vars": "off",
+  "known-imports/no-unused-vars": ["error", {"onlyRemoveKnownImports": true}]
 }
 ```
 
-See [ESLint documentation](http://eslint.org/docs/user-guide/configuring#extending-configuration-files) for more information about extending configuration files.
-
 # License
 
-ESLint-plugin-known-imports is licensed under the [MIT License](http://www.opensource.org/licenses/mit-license.php).
+eslint-plugin-known-imports is licensed under the [MIT License](http://www.opensource.org/licenses/mit-license.php).
