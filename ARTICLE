@@ -1,0 +1,9 @@
+Tired of writing/removing imports by hand? Enter eslint-plugin-known-imports
+
+[screencast]
+
+I'm a big believer in "good laziness". When I'm writing application code, I want to be spending my [precious cognitive resources] on the task at hand. Ideally I'm expressing the application logic that's "in my head" declaratively "in the code" and that's that. I, like many of you, have found that writing applications in React is an incredible experience in that regards.
+
+So on the last couple React/React Native projects I've worked on at [Blackbird Studios], I started feeling like writing `import` statements was the most boilerplate-y thing I was spending my time on. Vaguely inspired by [npm-install-webpack-plugin](https://github.com/webpack-contrib/npm-install-webpack-plugin) (which basically lets you "declaratively" write `import`s of new dependencies and it automatically `npm install`s them for you) and its promise of ["DX gold"](https://github.com/facebook/create-react-app/issues/186#issuecomment-235182001), it seemed like you should be able to just implicitly "declare" what imported things you're using and have the system/toolset be smart enough to figure it out.
+
+So now that I'm more familiar with ESLint (via working on the nascent [`eslint-plugin-coffee`]), I wrote [`eslint-plugin-known-imports`]. It extends existing ESLint rules like `no-undef` and `no-unused-vars`

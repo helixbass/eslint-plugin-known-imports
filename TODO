@@ -1,5 +1,5 @@
-- does it break to turn off a react/ rule if plugin: react isn't on?
 - support require()?
 - include existing tests of "base rules"
 - maybe belongs in other plugin: try and be smart enough to detect that the unused var is part of an object dereferencing and can be safely removed?
-- figure out how to release without committing lib/
+- update README
+- rule that just looks for places that don't follow the formatting of [nonlocal imports] [blank line] [local imports] [blank line]?
