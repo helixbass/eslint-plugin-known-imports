@@ -165,6 +165,16 @@ ruleTester.run 'no-unused-vars', rule,
     options: [onlyRemoveKnownImports: no]
   ,
     code: """
+      import * as y from "y";
+      export {w};
+    """
+    output: """
+      export {w};
+    """
+    errors: [definedError 'y']
+    options: [onlyRemoveKnownImports: no]
+  ,
+    code: """
       import View from "react-native";
       export const a = 1;
     """

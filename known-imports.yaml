@@ -5,6 +5,9 @@ fmap:
 numeral:
   module: numeral
   default: true
+d3:
+  module: d3
+  namespace: true
 Text:
   module: components/Text
   default: true

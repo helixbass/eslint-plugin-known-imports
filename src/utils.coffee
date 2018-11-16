@@ -54,7 +54,12 @@ getAddImportFix = ({
 
   sourceCode = context.getSourceCode()
   importName = "#{
-    if knownImport.name then "#{knownImport.name} as " else ''
+    if knownImport.namespace
+      '* as '
+    else if knownImport.name
+      "#{knownImport.name} as "
+    else
+      ''
   }#{name}"
   (fixer) ->
     prependDefaultImport = ->
@@ -108,7 +113,7 @@ getAddImportFix = ({
       fixer.insertTextBefore firstProgramToken, "#{text}\n\n"
     insertNewImport(
       "import #{
-        if knownImport.default
+        if knownImport.default or knownImport.namespace
           importName
         else
           "{#{importName}}"

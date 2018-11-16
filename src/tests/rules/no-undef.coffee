@@ -278,4 +278,17 @@ ruleTester.run 'no-undef', rule,
       message: "'withExtractedNavParams' is not defined."
       type: 'Identifier'
     ]
+  ,
+    code: """
+      d3.chart()
+    """
+    output: """
+      import * as d3 from 'd3'
+
+      d3.chart()
+    """
+    errors: [
+      message: "'d3' is not defined."
+      type: 'Identifier'
+    ]
   ]
