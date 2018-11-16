@@ -547,6 +547,10 @@ module.exports =
       (fixer) ->
         removeEntireImport = ->
           nextToken = sourceCode.getTokenAfter importDeclaration
+          if (
+            (precedingComments = sourceCode.getCommentsBefore(nextToken)).length
+          )
+            nextToken = precedingComments[0]
           nextTokenIsPrecededByBlankLine =
             sourceCode.text[(nextToken.range[0] - 2)...nextToken.range[0]] is
             '\n\n'

@@ -55,6 +55,19 @@ ruleTester.run 'no-unused-vars', rule,
     options: [onlyRemoveKnownImports: no]
   ,
     code: """
+      import {x} from "y";
+
+      // leading comment
+      export const a = 1;
+    """
+    output: """
+      // leading comment
+      export const a = 1;
+    """
+    errors: [definedError 'x']
+    options: [onlyRemoveKnownImports: no]
+  ,
+    code: """
       import {x, y} from "y";
       export {y};
     """
