@@ -2,6 +2,7 @@ fs = require 'fs'
 path = require 'path'
 {last, isString, mergeWith} = require 'lodash'
 {filter: ffilter, mapValues: fmapValues} = require 'lodash/fp'
+{default: ExportMap} = require 'eslint-plugin-import/lib/ExportMap'
 
 normalizeKnownImports = (knownImports = {}) ->
   return knownImports if knownImports.imports
@@ -60,15 +61,14 @@ loadKnownImports = ({settings = {}} = {}) ->
       loadedFromFile
   fromConfig = settings['known-imports/imports']
   fromConfig = normalizeKnownImports fromConfig
-  mergeWith fromFile, fromConfig, mergeKnownImportsField
+  mergeWith {}, fromFile, fromConfig, mergeKnownImportsField
 
-knownImportExists = ({name, context: {settings}}) ->
-  !!loadKnownImports({settings}).imports[name]
+knownImportExists = ({name, context: {settings}, context}) ->
   knownImports = loadKnownImports {settings}
   return null unless knownImports?
   {imports, whitelist} = knownImports
   knownImport = imports[name]
-  knownImport ?= findKnownImport {name, whitelist, settings}
+  knownImport ?= findKnownImport {name, whitelist, settings, context}
   knownImport ? null
 
 isFresh = ({cache, settings}) ->
@@ -80,7 +80,15 @@ isFresh = ({cache, settings}) ->
   }
   process.hrtime(lastSeen)[0] < lifetime
 
-createDirectoryCache = ({directory, recursive, extensions}) ->
+getExportMap = ({path, context: {settings, parserPath, parserOptions}}) ->
+  ExportMap.for {
+    path
+    settings
+    parserPath
+    parserOptions
+  }
+
+createDirectoryCache = ({directory, recursive, extensions, allowed, context}) ->
   cache = new Map()
   scanDir = (dir) ->
     dir = normalizePath dir
@@ -89,21 +97,48 @@ createDirectoryCache = ({directory, recursive, extensions}) ->
       if fs.statSync(fullPath).isDirectory()
         scanDir fullPath if recursive
       else
-        relativePath = fullPath.replace ///^#{directory}/?///, ''
-        {dir: dirName, name, ext} = path.parse relativePath
-        continue unless ext in extensions
-        cache.set name, "#{normalizePath dirName}#{name}"
+        relativePathWithExtension = fullPath.replace ///^#{directory}/?///, ''
+        {dir: dirName, name, ext} = path.parse relativePathWithExtension
+        relativePath = "#{normalizePath dirName}#{name}"
+        if 'filename' in allowed
+          continue unless ext in extensions
+          cache.set name, {
+            relativePath
+            type: 'filename'
+          }
+        if 'named' in allowed
+          exports = getExportMap {
+            path: fullPath
+            context
+          }
+          if exports?
+            for namedExport from exports.namespace.keys() when (
+              namedExport isnt 'default'
+            )
+              cache.set namedExport, {
+                relativePath
+                type: 'named'
+              }
   scanDir directory
   value: cache
   lastSeen: process.hrtime()
 
 directoryCaches = {}
-updateDirectoryCache = ({directory, recursive, extensions, settings}) ->
+updateDirectoryCache = ({
+  directory
+  recursive
+  extensions
+  settings
+  allowed
+  context
+}) ->
   directoryCache = directoryCaches[directory]
   directoryCache = directoryCaches[directory] = createDirectoryCache {
     directory
     recursive
     extensions
+    allowed
+    context
   } unless isFresh {cache: directoryCache, settings}
   directoryCache.value
 
@@ -120,23 +155,26 @@ findKnownImportInDirectory = ({
   extensions
   name
   settings
+  context
 }) ->
   directory = normalizePath directory
   prefix = normalizePath prefix
-  if 'filename' in allowed
-    directoryCache = updateDirectoryCache {
-      directory
-      recursive
-      extensions
-      settings
-    }
-    return null unless (relativePath = directoryCache.get name)
-    importPath = "#{prefix}#{relativePath}"
-    module: importPath
-    default: yes
-    local: yes
+  directoryCache = updateDirectoryCache {
+    directory
+    recursive
+    extensions
+    settings
+    allowed
+    context
+  }
+  return null unless (found = directoryCache.get name)
+  {relativePath, type} = found
+  importPath = "#{prefix}#{relativePath}"
+  module: importPath
+  default: type is 'filename'
+  local: yes
 
-findKnownImport = ({name, whitelist, settings = {}}) ->
+findKnownImport = ({name, whitelist, settings = {}, context}) ->
   return null unless whitelist?.length
   extensions = settings['known-imports/extensions'] ? ['.js', '.jsx', '.coffee']
   for directoryConfig in whitelist
@@ -146,9 +184,13 @@ findKnownImport = ({name, whitelist, settings = {}}) ->
         name
         extensions
         settings
+        context
       })
     )
     return found
+
+shouldIncludeBlankLineBeforeLocalImports = ({context: {settings = {}}}) ->
+  !!settings['known-imports/blank-line-before-local-imports']
 
 getAddImportFix = ({name, context, allImports, lastNonlocalImport}) ->
   knownImport = knownImportExists {name, context}
@@ -197,7 +239,10 @@ getAddImportFix = ({name, context, allImports, lastNonlocalImport}) ->
     insertNewImport = (text) ->
       return fixer.insertTextAfter(
         lastExistingImport
-        "\n#{if knownImport.local
+        "\n#{if (
+          knownImport.local and
+          shouldIncludeBlankLineBeforeLocalImports {context}
+        )
           onlyExistingNonlocalImports =
             lastNonlocalImport.found is last allImports
           if onlyExistingNonlocalImports

@@ -8,7 +8,7 @@
   "license": "MIT",
   "scripts": {
     "lint": "eslint src/*.coffee src/*/*.coffee",
-    "test": "mocha lib/tests/**/*.js",
+    "test": "mocha 'lib/tests/{,!(fixtures)/**}/*.js'",
     "watch": "coffee -o lib/ -wc src/",
     "prepublish": "coffee -o lib/ -c src/"
   },
@@ -34,6 +34,7 @@
     "prettier-plugin-coffeescript": "^0.0.4"
   },
   "dependencies": {
+    "eslint-plugin-import": "^2.14.0",
     "eslint-plugin-react": "^7.10.0",
     "js-yaml": "^3.12.0",
     "lodash": "^4.17.10"

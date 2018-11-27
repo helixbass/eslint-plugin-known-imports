@@ -259,6 +259,24 @@ ruleTester.run 'no-undef', rule,
     """
     errors: [message: "'fmap' is not defined.", type: 'Identifier']
   ,
+    # no blank line before local imports by default
+    code: """
+      import {filter as ffilter} from 'lodash/fp'
+
+      withExtractedNavParams()
+    """
+    output: """
+      import {filter as ffilter} from 'lodash/fp'
+      import {withExtractedNavParams} from 'utils/navigation'
+
+      withExtractedNavParams()
+    """
+    errors: [
+      message: "'withExtractedNavParams' is not defined."
+      type: 'Identifier'
+    ]
+  ,
+    # blank line before local imports
     code: """
       import {filter as ffilter} from 'lodash/fp'
 
@@ -275,6 +293,8 @@ ruleTester.run 'no-undef', rule,
       message: "'withExtractedNavParams' is not defined."
       type: 'Identifier'
     ]
+    settings:
+      'known-imports/blank-line-before-local-imports': yes
   ,
     code: """
       d3.chart()
@@ -289,6 +309,7 @@ ruleTester.run 'no-undef', rule,
       type: 'Identifier'
     ]
   ,
+    # whitelist filename
     code: """
       Empty()
     """
@@ -302,6 +323,7 @@ ruleTester.run 'no-undef', rule,
       type: 'Identifier'
     ]
   ,
+    # whitelist filename nested
     code: """
       emptyNest()
     """
@@ -314,4 +336,72 @@ ruleTester.run 'no-undef', rule,
       message: "'emptyNest' is not defined."
       type: 'Identifier'
     ]
+  ,
+    # whitelist named
+    code: """
+      one()
+    """
+    output: """
+      import {one} from 'fixtures/named'
+
+      one()
+    """
+    errors: [
+      message: "'one' is not defined."
+      type: 'Identifier'
+    ]
+  ,
+    # prioritize explicit over whitelist
+    code: """
+      Empty()
+    """
+    output: """
+      import {Empty} from 'explicit'
+
+      Empty()
+    """
+    errors: [
+      message: "'Empty' is not defined."
+      type: 'Identifier'
+    ]
+    settings:
+      'known-imports/imports':
+        Empty: 'explicit'
+  ,
+    # don't use local convention by default for whitelist
+    code: """
+      import a from 'b'
+
+      Empty()
+    """
+    output: """
+      import a from 'b'
+      import Empty from 'fixtures/Empty'
+
+      Empty()
+    """
+    errors: [
+      message: "'Empty' is not defined."
+      type: 'Identifier'
+    ]
+  ,
+    # local convention for whitelist
+    code: """
+      import a from 'b'
+
+      Empty()
+    """
+    output: """
+      import a from 'b'
+
+      import Empty from 'fixtures/Empty'
+
+      Empty()
+    """
+    errors: [
+      message: "'Empty' is not defined."
+      type: 'Identifier'
+    ]
+    settings:
+      'known-imports/blank-line-before-local-imports': yes
   ]

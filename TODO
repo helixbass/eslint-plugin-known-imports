@@ -4,5 +4,10 @@
 - update README
 - rule that just looks for places that don't follow the formatting of [nonlocal imports] [blank line] [local imports] [blank line]?
 - for whitelist, allow to specify extensions which should be explicitly included in generated import name (settings['known-imports/extensions'] as an object eg {'.coffee': {includeExtensionInImport: yes}}?)
-- don't always generate local: yes for whitelist imports (in case they don't want to follow the convention)
+- allow specifying everything in config file or eslint config (eg allow blank-line-before-local-imports in config file)
 - specify min node version in package.json engines or transpile object spread?
+- allow whitelisting things other than directories eg glob, single file
+- blacklists (to refine whitelists) - allow to specify blacklisted names, paths?
+- relative priority of whitelist filename vs named?
+  including priority in the sense of being able to specify a different whitelist for a subdirectory (eg whitelist filenames for src/ but only whitelist named imports for src/util/)
+- clarity about how known-imports/extensions relates to import extensions? rename extensions to known-imports/filename-whitelist-extensions?

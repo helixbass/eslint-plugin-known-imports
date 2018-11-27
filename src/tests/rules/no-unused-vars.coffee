@@ -292,4 +292,15 @@ ruleTester.run 'no-unused-vars', rule,
     """
     errors: [definedError 'Empty']
     options: [onlyRemoveKnownImports: yes]
+  ,
+    # onlyRemoveKnownImports understands whitelist named
+    code: """
+      import {one} from "fixtures/named";
+      export const a = 1;
+    """
+    output: """
+      export const a = 1;
+    """
+    errors: [definedError 'one']
+    options: [onlyRemoveKnownImports: yes]
   ]
