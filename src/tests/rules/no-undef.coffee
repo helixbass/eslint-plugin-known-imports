@@ -136,13 +136,12 @@ ruleTester.run 'no-undef', rule,
       message: "'localFromConfig' is not defined."
       type: 'Identifier'
     ]
-    options: [
-      knownImports:
+    settings:
+      'known-imports/imports':
         localFromConfig:
           module: '../localFromConfig'
           default: yes
           local: yes
-    ]
   ,
     # merges eslintrc config
     code: """
@@ -167,13 +166,12 @@ ruleTester.run 'no-undef', rule,
       message: "'localFromConfig' is not defined."
       type: 'Identifier'
     ]
-    options: [
-      knownImports:
+    settings:
+      'known-imports/imports':
         localFromConfig:
           module: '../localFromConfig'
           default: yes
           local: yes
-    ]
   ,
     # eslintrc config fully overrides known import
     code: """
@@ -195,11 +193,10 @@ ruleTester.run 'no-undef', rule,
       message: "'numeral' is not defined."
       type: 'Identifier'
     ]
-    options: [
-      knownImports:
+    settings:
+      'known-imports/imports':
         numeral:
           module: 'other-numeral'
-    ]
   ,
     # ...and when using shorthand
     code: """
@@ -221,10 +218,9 @@ ruleTester.run 'no-undef', rule,
       message: "'numeral' is not defined."
       type: 'Identifier'
     ]
-    options: [
-      knownImports:
+    settings:
+      'known-imports/imports':
         numeral: 'other-numeral'
-    ]
   ,
     # accepts path to known-imports config
     code: """
@@ -246,7 +242,8 @@ ruleTester.run 'no-undef', rule,
       message: "'fmap' is not defined."
       type: 'Identifier'
     ]
-    options: [knownImportsFile: 'other-known-imports.json']
+    settings:
+      'known-imports/config-file-path': 'other-known-imports.json'
   ,
     code: '''
       "use strict"
@@ -289,6 +286,32 @@ ruleTester.run 'no-undef', rule,
     """
     errors: [
       message: "'d3' is not defined."
+      type: 'Identifier'
+    ]
+  ,
+    code: """
+      Empty()
+    """
+    output: """
+      import Empty from 'fixtures/Empty'
+
+      Empty()
+    """
+    errors: [
+      message: "'Empty' is not defined."
+      type: 'Identifier'
+    ]
+  ,
+    code: """
+      emptyNest()
+    """
+    output: """
+      import emptyNest from 'fixtures/nested/emptyNest'
+
+      emptyNest()
+    """
+    errors: [
+      message: "'emptyNest' is not defined."
       type: 'Identifier'
     ]
   ]

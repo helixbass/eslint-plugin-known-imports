@@ -14,3 +14,4 @@ rules:
   coffee/no-magic-numbers: off
 env:
   node: true
+  es6: true

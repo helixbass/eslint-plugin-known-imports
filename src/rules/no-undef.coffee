@@ -35,10 +35,10 @@ module.exports =
       properties:
         typeof:
           type: 'boolean'
-        knownImports:
-          type: 'object'
-        knownImportsFile:
-          type: 'string'
+        # knownImports:
+        #   type: 'object'
+        # knownImportsFile:
+        #   type: 'string'
       additionalProperties: no
     ]
     fixable: 'code'
@@ -47,12 +47,6 @@ module.exports =
     options = context.options[0] ? {}
     considerTypeOf = options.typeof is yes
 
-    knownImports = null
-    lazyLoadKnownImports = ->
-      knownImports ?= loadKnownImports(
-        fromConfig: options.knownImports
-        configFilePath: options.knownImportsFile
-      )
     allImports = []
     lastNonlocalImport = {}
 
@@ -68,7 +62,6 @@ module.exports =
           message: "'{{name}}' is not defined."
           data: identifier
           fix: getFix {
-            knownImports: lazyLoadKnownImports()
             name: identifier.name
             context
             allImports

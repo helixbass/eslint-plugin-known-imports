@@ -1,4 +1,5 @@
 fs = require 'fs'
+path = require 'path'
 {last, isString, mergeWith} = require 'lodash'
 {filter: ffilter, mapValues: fmapValues} = require 'lodash/fp'
 
@@ -25,7 +26,9 @@ loadConfigFile = (filename) ->
   return JSON.parse file if /\.json$/.test filename
   return require('js-yaml').safeLoad file
 
-loadKnownImports = ({fromConfig = {}, configFilePath} = {}) ->
+loadKnownImports = ({fromConfig, configFilePath, settings = {}} = {}) ->
+  configFilePath ?= settings['known-imports/config-file-path']
+  fromConfig ?= settings['known-imports/imports'] ? {}
   fromFile = normalizeKnownImports do ->
     if configFilePath
       throw new Error(
@@ -42,14 +45,98 @@ loadKnownImports = ({fromConfig = {}, configFilePath} = {}) ->
   fromConfig = normalizeKnownImports fromConfig
   mergeWith fromFile, fromConfig, mergeKnownImportsField
 
+isFresh = ({cache, settings}) ->
+  return unless cache?
+  {lastSeen} = cache
+  {lifetime} = {
+    lifetime: 30
+    ...(settings?['known-imports/cache'] ? {})
+  }
+  process.hrtime(lastSeen)[0] < lifetime
+
+createDirectoryCache = ({directory, recursive, extensions}) ->
+  cache = new Map()
+  scanDir = (dir) ->
+    dir = normalizePath dir
+    for file in fs.readdirSync dir
+      fullPath = dir + file
+      if fs.statSync(fullPath).isDirectory()
+        scanDir fullPath if recursive
+      else
+        relativePath = fullPath.replace ///^#{directory}/?///, ''
+        {dir: dirName, name, ext} = path.parse relativePath
+        continue unless ext in extensions
+        cache.set name, "#{normalizePath dirName}#{name}"
+  scanDir directory
+  entries: cache
+  lastSeen: process.hrtime()
+
+directoryCaches = {}
+updateDirectoryCache = ({directory, recursive, extensions, settings}) ->
+  directoryCache = directoryCaches[directory]
+  directoryCache = directoryCaches[directory] = createDirectoryCache {
+    directory
+    recursive
+    extensions
+  } unless isFresh {cache: directoryCache, settings}
+  directoryCache.entries
+
+normalizePath = (path) ->
+  return path unless path
+  return path if /// / $ ///.test path
+  "#{path}/"
+
+findKnownImportInDirectory = ({
+  directory
+  allowed = ['filename']
+  prefix = ''
+  recursive = yes
+  extensions
+  name
+  settings
+}) ->
+  directory = normalizePath directory
+  prefix = normalizePath prefix
+  if 'filename' in allowed
+    directoryCache = updateDirectoryCache {
+      directory
+      recursive
+      extensions
+      settings
+    }
+    return null unless (relativePath = directoryCache.get name)
+    importPath = "#{prefix}#{relativePath}"
+    module: importPath
+    default: yes
+    local: yes
+
+findKnownImport = ({name, whitelist, settings = {}}) ->
+  return null unless whitelist?.length
+  extensions = settings['known-imports/extensions'] ? ['.js', '.jsx', '.coffee']
+  for directoryConfig in whitelist
+    continue unless (
+      (found = findKnownImportInDirectory {
+        ...directoryConfig
+        name
+        extensions
+        settings
+      })
+    )
+    return found
+
 getAddImportFix = ({
   knownImports
   name
   context
+  context: {settings}
   allImports
   lastNonlocalImport
 }) ->
-  knownImport = knownImports.imports[name]
+  knownImports ?= loadKnownImports {settings}
+  return null unless knownImports?
+  {imports, whitelist} = knownImports
+  knownImport = imports[name]
+  knownImport ?= findKnownImport {name, whitelist, settings}
   return null unless knownImport
 
   sourceCode = context.getSourceCode()
@@ -95,17 +182,15 @@ getAddImportFix = ({
     insertNewImport = (text) ->
       return fixer.insertTextAfter(
         lastExistingImport
-        "\n#{
-          if knownImport.local
-            onlyExistingNonlocalImports =
-              lastNonlocalImport.found is last allImports
-            if onlyExistingNonlocalImports
-              '\n'
-            else
-              ''
+        "\n#{if knownImport.local
+          onlyExistingNonlocalImports =
+            lastNonlocalImport.found is last allImports
+          if onlyExistingNonlocalImports
+            '\n'
           else
             ''
-        }#{text}"
+        else
+          ''}#{text}"
       ) if lastExistingImport
       firstProgramToken = sourceCode.getFirstToken sourceCode.ast,
         # skip directives

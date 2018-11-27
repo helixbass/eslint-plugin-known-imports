@@ -3,3 +3,6 @@
 - maybe belongs in other plugin: try and be smart enough to detect that the unused var is part of an object dereferencing and can be safely removed?
 - update README
 - rule that just looks for places that don't follow the formatting of [nonlocal imports] [blank line] [local imports] [blank line]?
+- for whitelist, allow to specify extensions which should be explicitly included in generated import name (settings['known-imports/extensions'] as an object eg {'.coffee': {includeExtensionInImport: yes}}?)
+- don't always generate local: yes for whitelist imports (in case they don't want to follow the convention)
+- specify min node version in package.json engines or transpile object spread?

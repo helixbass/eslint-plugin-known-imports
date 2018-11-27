@@ -1,17 +1,24 @@
-View: react-native
-fmap:
-  module: lodash/fp
-  name: map
-numeral:
-  module: numeral
-  default: true
-d3:
-  module: d3
-  namespace: true
-Text:
-  module: components/Text
-  default: true
-  local: true
-withExtractedNavParams:
-  module: utils/navigation
-  local: true
+imports:
+  View: react-native
+  fmap:
+    module: lodash/fp
+    name: map
+  numeral:
+    module: numeral
+    default: true
+  d3:
+    module: d3
+    namespace: true
+  Text:
+    module: components/Text
+    default: true
+    local: true
+  withExtractedNavParams:
+    module: utils/navigation
+    local: true
+whitelist:
+  - directory: lib/tests/fixtures
+    # allowed: [filename, default, named]
+    allowed: [filename]
+    prefix: fixtures
+    recursive: true
