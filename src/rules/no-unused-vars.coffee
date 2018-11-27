@@ -11,7 +11,7 @@
 
 lodash = require 'lodash'
 astUtils = require '../eslint-ast-utils'
-{loadKnownImports} = require '../utils'
+{knownImportExists} = require '../utils'
 
 #------------------------------------------------------------------------------
 # Rule Definition
@@ -47,10 +47,10 @@ module.exports =
             type: 'string'
           onlyRemoveKnownImports:
             type: 'boolean'
-          knownImports:
-            type: 'object'
-          knownImportsFile:
-            type: 'string'
+            # knownImports:
+            #   type: 'object'
+            # knownImportsFile:
+            #   type: 'string'
       ]
     ]
 
@@ -81,8 +81,8 @@ module.exports =
         config.caughtErrors = firstOption.caughtErrors or config.caughtErrors
         config.onlyRemoveKnownImports =
           firstOption.onlyRemoveKnownImports or config.onlyRemoveKnownImports
-        config.knownImports = firstOption.knownImports
-        config.knownImportsFile = firstOption.knownImportsFile
+        # config.knownImports = firstOption.knownImports
+        # config.knownImportsFile = firstOption.knownImportsFile
 
         if firstOption.varsIgnorePattern
           config.varsIgnorePattern = new RegExp firstOption.varsIgnorePattern
@@ -94,13 +94,6 @@ module.exports =
           config.caughtErrorsIgnorePattern = new RegExp(
             firstOption.caughtErrorsIgnorePattern
           )
-
-    knownImports = null
-    lazyLoadKnownImports = ->
-      knownImports ?= loadKnownImports(
-        fromConfig: config.knownImports, configFilePath: config.knownImportsFile
-      )
-      knownImports
 
     ###*
     # Generate the warning message about the variable being
@@ -538,7 +531,7 @@ module.exports =
       return null unless def.type is 'ImportBinding'
       return null if (
         config.onlyRemoveKnownImports and
-        not lazyLoadKnownImports().imports[unusedVar.name]
+        not knownImportExists {name: unusedVar.name, context}
       )
 
       importDeclaration = def.parent

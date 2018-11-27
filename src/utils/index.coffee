@@ -27,8 +27,8 @@ loadConfigFile = (filename) ->
   return require('js-yaml').safeLoad file
 
 knownImportsCache = null
-loadKnownImports = ({fromConfig, configFilePath, settings = {}} = {}) ->
-  configFilePath ?= settings['known-imports/config-file-path']
+loadKnownImports = ({settings = {}} = {}) ->
+  configFilePath = settings['known-imports/config-file-path']
   fromFile =
     if (
       knownImportsCache?.configFilePath is configFilePath and
@@ -58,9 +58,18 @@ loadKnownImports = ({fromConfig, configFilePath, settings = {}} = {}) ->
         value: loadedFromFile
       }
       loadedFromFile
-  fromConfig ?= settings['known-imports/imports']
+  fromConfig = settings['known-imports/imports']
   fromConfig = normalizeKnownImports fromConfig
   mergeWith fromFile, fromConfig, mergeKnownImportsField
+
+knownImportExists = ({name, context: {settings}}) ->
+  !!loadKnownImports({settings}).imports[name]
+  knownImports = loadKnownImports {settings}
+  return null unless knownImports?
+  {imports, whitelist} = knownImports
+  knownImport = imports[name]
+  knownImport ?= findKnownImport {name, whitelist, settings}
+  knownImport ? null
 
 isFresh = ({cache, settings}) ->
   return unless cache?
@@ -141,20 +150,9 @@ findKnownImport = ({name, whitelist, settings = {}}) ->
     )
     return found
 
-getAddImportFix = ({
-  knownImports
-  name
-  context
-  context: {settings}
-  allImports
-  lastNonlocalImport
-}) ->
-  knownImports ?= loadKnownImports {settings}
-  return null unless knownImports?
-  {imports, whitelist} = knownImports
-  knownImport = imports[name]
-  knownImport ?= findKnownImport {name, whitelist, settings}
-  return null unless knownImport
+getAddImportFix = ({name, context, allImports, lastNonlocalImport}) ->
+  knownImport = knownImportExists {name, context}
+  return null unless knownImport?
 
   sourceCode = context.getSourceCode()
   importName = "#{
@@ -222,4 +220,4 @@ getAddImportFix = ({
       } from '#{knownImport.module}'"
     )
 
-module.exports = {loadKnownImports, getAddImportFix}
+module.exports = {knownImportExists, getAddImportFix}

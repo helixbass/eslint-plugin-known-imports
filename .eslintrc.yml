@@ -12,6 +12,7 @@ rules:
   no-console: error
   coffee/no-unused-expressions: off
   coffee/no-magic-numbers: off
+  coffee/no-implicit-coercion: off
 env:
   node: true
   es6: true

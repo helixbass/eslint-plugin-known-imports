@@ -228,9 +228,9 @@ ruleTester.run 'no-unused-vars', rule,
       export const a = 1;
     """
     errors: [definedError 'numeral']
-    options: [
-      onlyRemoveKnownImports: yes, knownImportsFile: 'other-known-imports.json'
-    ]
+    options: [onlyRemoveKnownImports: yes]
+    settings:
+      'known-imports/config-file-path': 'other-known-imports.json'
   ,
     # respect inline knownImports
     code: """
@@ -241,14 +241,13 @@ ruleTester.run 'no-unused-vars', rule,
       export const a = 1;
     """
     errors: [definedError 'numeral']
-    options: [
-      onlyRemoveKnownImports: yes
-      knownImportsFile: 'other-known-imports.json'
-      knownImports:
+    options: [onlyRemoveKnownImports: yes]
+    settings:
+      'known-imports/config-file-path': 'other-known-imports.json'
+      'known-imports/imports':
         numeral:
           module: 'numeral'
           default: yes
-    ]
   ,
     # preserve blank line
     code: """
@@ -282,4 +281,15 @@ ruleTester.run 'no-unused-vars', rule,
       export const a = someLocalDependency;
     """
     errors: [definedError 'c']
+  ,
+    # onlyRemoveKnownImports understands whitelist filename
+    code: """
+      import Empty from "fixtures/Empty";
+      export const a = 1;
+    """
+    output: """
+      export const a = 1;
+    """
+    errors: [definedError 'Empty']
+    options: [onlyRemoveKnownImports: yes]
   ]
