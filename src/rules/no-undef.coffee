@@ -3,7 +3,7 @@
 # @author Mark Macdonald
 ###
 
-{loadKnownImports, getAddImportFix: getFix} = require '../utils'
+{getAddImportFix: getFix} = require '../utils'
 
 #------------------------------------------------------------------------------
 # Helpers

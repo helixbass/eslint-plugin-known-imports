@@ -109,13 +109,12 @@ ruleTester.run 'jsx-no-undef', rule,
     ,
       message: "'LocalFromConfig' is not defined."
     ]
-    options: [
-      knownImports:
+    settings:
+      'known-imports/imports':
         LocalFromConfig:
           module: 'components/LocalFromConfig'
           default: yes
           local: yes
-    ]
   ,
     # eslintrc config fully overrides known import
     code: """
@@ -134,11 +133,10 @@ ruleTester.run 'jsx-no-undef', rule,
       React.render(<Text />)
     """
     errors: [message: "'Text' is not defined."]
-    options: [
-      knownImports:
+    settings:
+      'known-imports/imports':
         Text:
           module: 'other-place'
-    ]
   ,
     # accepts path to known-imports config
     code: """
@@ -157,5 +155,16 @@ ruleTester.run 'jsx-no-undef', rule,
       React.render(<Text />)
     """
     errors: [message: "'Text' is not defined."]
-    options: [knownImportsFile: 'other-known-imports.json']
+    settings:
+      'known-imports/config-file-path': 'other-known-imports.json'
+  ,
+    code: """
+      <Empty />
+    """
+    output: """
+      import Empty from 'fixtures/Empty'
+
+      <Empty />
+    """
+    errors: [message: "'Empty' is not defined."]
   ]

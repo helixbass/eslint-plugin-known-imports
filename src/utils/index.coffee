@@ -3,7 +3,7 @@ path = require 'path'
 {last, isString, mergeWith} = require 'lodash'
 {filter: ffilter, mapValues: fmapValues} = require 'lodash/fp'
 
-normalizeKnownImports = (knownImports) ->
+normalizeKnownImports = (knownImports = {}) ->
   return knownImports if knownImports.imports
   imports: knownImports
 
@@ -26,22 +26,39 @@ loadConfigFile = (filename) ->
   return JSON.parse file if /\.json$/.test filename
   return require('js-yaml').safeLoad file
 
+knownImportsCache = null
 loadKnownImports = ({fromConfig, configFilePath, settings = {}} = {}) ->
   configFilePath ?= settings['known-imports/config-file-path']
-  fromConfig ?= settings['known-imports/imports'] ? {}
-  fromFile = normalizeKnownImports do ->
-    if configFilePath
-      throw new Error(
-        "Couldn't load known imports file '#{configFilePath}'"
-      ) unless fs.existsSync configFilePath
-      return loadConfigFile configFilePath
-    for filename in [
-      'known-imports.yaml'
-      'known-imports.yml'
-      'known-imports.json'
-    ] when fs.existsSync(filename)
-      return loadConfigFile filename
-    {}
+  fromFile =
+    if (
+      knownImportsCache?.configFilePath is configFilePath and
+      isFresh {
+        cache: knownImportsCache
+        settings
+      }
+    )
+      knownImportsCache.value
+    else
+      loadedFromFile = normalizeKnownImports do ->
+        if configFilePath
+          throw new Error(
+            "Couldn't load known imports file '#{configFilePath}'"
+          ) unless fs.existsSync configFilePath
+          return loadConfigFile configFilePath
+        for filename in [
+          'known-imports.yaml'
+          'known-imports.yml'
+          'known-imports.json'
+        ] when fs.existsSync(filename)
+          return loadConfigFile filename
+        {}
+      knownImportsCache = {
+        configFilePath
+        lastSeen: process.hrtime()
+        value: loadedFromFile
+      }
+      loadedFromFile
+  fromConfig ?= settings['known-imports/imports']
   fromConfig = normalizeKnownImports fromConfig
   mergeWith fromFile, fromConfig, mergeKnownImportsField
 
@@ -68,7 +85,7 @@ createDirectoryCache = ({directory, recursive, extensions}) ->
         continue unless ext in extensions
         cache.set name, "#{normalizePath dirName}#{name}"
   scanDir directory
-  entries: cache
+  value: cache
   lastSeen: process.hrtime()
 
 directoryCaches = {}
@@ -79,7 +96,7 @@ updateDirectoryCache = ({directory, recursive, extensions, settings}) ->
     recursive
     extensions
   } unless isFresh {cache: directoryCache, settings}
-  directoryCache.entries
+  directoryCache.value
 
 normalizePath = (path) ->
   return path unless path

@@ -5,7 +5,7 @@
 
 'use strict'
 
-{loadKnownImports, getAddImportFix: getFix} = require '../utils'
+{getAddImportFix: getFix} = require '../utils'
 
 ###*
 # Checks if a node name match the JSX tag convention.
@@ -30,10 +30,10 @@ module.exports =
       properties:
         allowGlobals:
           type: 'boolean'
-        knownImports:
-          type: 'object'
-        knownImportsFile:
-          type: 'string'
+        # knownImports:
+        #   type: 'object'
+        # knownImportsFile:
+        #   type: 'string'
       additionalProperties: no
     ]
     fixable: 'code'
@@ -41,11 +41,6 @@ module.exports =
   create: (context) ->
     config = context.options[0] or {}
     allowGlobals = config.allowGlobals or no
-    knownImports = null
-    lazyLoadKnownImports = ->
-      knownImports ?= loadKnownImports(
-        fromConfig: config.knownImports, configFilePath: config.knownImportsFile
-      )
 
     ###*
     # Compare an identifier with the variables declared in the scope
@@ -84,7 +79,6 @@ module.exports =
         node
         message: "'#{node.name}' is not defined."
         fix: getFix {
-          knownImports: lazyLoadKnownImports()
           name: node.name
           context
           allImports
