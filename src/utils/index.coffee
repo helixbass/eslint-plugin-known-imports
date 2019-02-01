@@ -50,6 +50,9 @@ loadKnownImports = ({settings = {}} = {}) ->
           'known-imports.yaml'
           'known-imports.yml'
           'known-imports.json'
+          '.known-imports.yaml'
+          '.known-imports.yml'
+          '.known-imports.json'
         ] when fs.existsSync(filename)
           return loadConfigFile filename
         {}
@@ -63,10 +66,19 @@ loadKnownImports = ({settings = {}} = {}) ->
   fromConfig = normalizeKnownImports fromConfig
   mergeWith {}, fromFile, fromConfig, mergeKnownImportsField
 
+defaultBlacklist = ['index']
+
+addDefaultBlacklist = (knownImports) ->
+  return knownImports unless knownImports?
+  knownImports.blacklist ?= []
+  knownImports.blacklist = [...knownImports.blacklist, ...defaultBlacklist]
+  knownImports
+
 knownImportExists = ({name, context: {settings}, context}) ->
-  knownImports = loadKnownImports {settings}
+  knownImports = addDefaultBlacklist loadKnownImports {settings}
   return null unless knownImports?
-  {imports, whitelist} = knownImports
+  {imports, whitelist, blacklist} = knownImports
+  return null if blacklist?.length and name in blacklist
   knownImport = imports[name]
   knownImport ?= findKnownImport {name, whitelist, settings, context}
   knownImport ? null

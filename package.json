@@ -31,7 +31,7 @@
     "eslint-plugin-prettier": "^2.6.2",
     "mocha": "^5.2.0",
     "prettier": "github:helixbass/prettier#de38bc19",
-    "prettier-plugin-coffeescript": "^0.0.4"
+    "prettier-plugin-coffeescript": "^0.0.5"
   },
   "dependencies": {
     "eslint-plugin-import": "^2.14.0",

@@ -30,9 +30,10 @@
     esutils "^2.0.2"
     js-tokens "^3.0.0"
 
-"@babel/parser@7.0.0-beta.55":
-  version "7.0.0-beta.55"
-  resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.0.0-beta.55.tgz#0a527efc148c6c8cd85d5ffddacad817a2daeeb2"
+"@babel/parser@7.1.2":
+  version "7.1.2"
+  resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.1.2.tgz#85c5c47af6d244fab77bce6b9bd830e38c978409"
+  integrity sha512-x5HFsW+E/nQalGMw7hu+fvPqnBeBaIr0lWJ2SG0PPL2j+Pm9lYvCrsZJGIgauPIENx0v10INIyFjmSNUD/gSqQ==
 
 "@babel/parser@7.1.5":
   version "7.1.5"
@@ -67,12 +68,6 @@
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@iarna/toml/-/toml-2.0.0.tgz#7802115684397785b3b6dc8a3ba50e30d7a7422b"
 
-"@types/commander@^2.11.0":
-  version "2.12.2"
-  resolved "https://registry.yarnpkg.com/@types/commander/-/commander-2.12.2.tgz#183041a23842d4281478fa5d23c5ca78e6fd08ae"
-  dependencies:
-    commander "*"
-
 "@types/node@*":
   version "10.9.4"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-10.9.4.tgz#0f4cb2dc7c1de6096055357f70179043c33e9897"
@@ -81,7 +76,7 @@
   version "10.12.10"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-10.12.10.tgz#4fa76e6598b7de3f0cb6ec3abacc4f59e5b3a2ce"
 
-"@types/semver@^5.4.0", "@types/semver@^5.5.0":
+"@types/semver@^5.5.0":
   version "5.5.0"
   resolved "https://registry.yarnpkg.com/@types/semver/-/semver-5.5.0.tgz#146c2a29ee7d3bae4bf2fcb274636e264c813c45"
 
@@ -146,6 +141,14 @@ align-text@^0.1.1, align-text@^0.1.3:
 amdefine@>=0.0.4:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/amdefine/-/amdefine-1.0.1.tgz#4a5282ac164729e93619bcfd3ad151f817ce91f5"
+
+angular-estree-parser@1.1.3:
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/angular-estree-parser/-/angular-estree-parser-1.1.3.tgz#679b7a1ab57e56cd484b5c44e380bcec7633df58"
+  integrity sha512-2kUtrcvjb2ZMW/FWXeGxpttwY2Ax4SE8RErmfai2Gq5+cEzKdfSerEnOplQyWSL1cTN8i67h+vccElBSravWDg==
+  dependencies:
+    lines-and-columns "^1.1.6"
+    tslib "^1.9.3"
 
 angular-estree-parser@1.1.5:
   version "1.1.5"
@@ -428,6 +431,21 @@ co@^4.6.0:
     eslint-plugin-standard "^3.0.1"
     prettier "github:helixbass/prettier#just-format-ast"
 
+"coffeescript@github:helixbass/coffeescript#cbaf4303":
+  version "2.3.2"
+  resolved "https://codeload.github.com/helixbass/coffeescript/tar.gz/cbaf43033006f4920bdc350b716f7722a5bf69c9"
+  dependencies:
+    babel-eslint "^7.2.2"
+    babylon "^7.0.0-beta.44"
+    eslint "^4.19.0"
+    eslint-config-prettier "^2.9.0"
+    eslint-config-standard "^11.0.0"
+    eslint-plugin-import "^2.9.0"
+    eslint-plugin-node "^6.0.1"
+    eslint-plugin-promise "^3.7.0"
+    eslint-plugin-standard "^3.0.1"
+    prettier "github:helixbass/prettier#just-format-ast"
+
 "coffeescript@github:helixbass/coffeescript#d2bada7":
   version "2.3.1"
   resolved "https://codeload.github.com/helixbass/coffeescript/tar.gz/d2bada7b5e91befbf15712b7da0639d36300ea06"
@@ -457,10 +475,6 @@ color-name@1.1.3:
   version "1.1.3"
   resolved "https://registry.yarnpkg.com/color-name/-/color-name-1.1.3.tgz#a7d0558bd89c42f795dd42328f740831ca53bc25"
 
-commander@*, commander@^2.11.0, commander@^2.9.0:
-  version "2.17.1"
-  resolved "https://registry.yarnpkg.com/commander/-/commander-2.17.1.tgz#bd77ab7de6de94205ceacc72f1716d29f20a77bf"
-
 commander@2.15.1:
   version "2.15.1"
   resolved "https://registry.yarnpkg.com/commander/-/commander-2.15.1.tgz#df46e867d0fc2aec66a34662b406a9ccafff5b0f"
@@ -468,6 +482,10 @@ commander@2.15.1:
 commander@^2.19.0:
   version "2.19.0"
   resolved "https://registry.yarnpkg.com/commander/-/commander-2.19.0.tgz#f6198aa84e5b83c46054b94ddedbfed5ee9ff12a"
+
+commander@^2.9.0:
+  version "2.17.1"
+  resolved "https://registry.yarnpkg.com/commander/-/commander-2.17.1.tgz#bd77ab7de6de94205ceacc72f1716d29f20a77bf"
 
 concat-map@0.0.1:
   version "0.0.1"
@@ -617,17 +635,6 @@ editorconfig@0.14.2:
     commander "^2.9.0"
     lru-cache "^3.2.0"
     semver "^5.1.0"
-    sigmund "^1.0.1"
-
-editorconfig@0.15.0:
-  version "0.15.0"
-  resolved "https://registry.yarnpkg.com/editorconfig/-/editorconfig-0.15.0.tgz#b6dd4a0b6b9e76ce48e066bdc15381aebb8804fd"
-  dependencies:
-    "@types/commander" "^2.11.0"
-    "@types/semver" "^5.4.0"
-    commander "^2.11.0"
-    lru-cache "^4.1.1"
-    semver "^5.4.1"
     sigmund "^1.0.1"
 
 editorconfig@0.15.2:
@@ -997,10 +1004,6 @@ flatten@^1.0.2:
 flow-parser@0.64.0:
   version "0.64.0"
   resolved "https://registry.yarnpkg.com/flow-parser/-/flow-parser-0.64.0.tgz#858664ef2246880f9a81b05e69fbd308a1b865c9"
-
-flow-parser@0.78.0:
-  version "0.78.0"
-  resolved "https://registry.yarnpkg.com/flow-parser/-/flow-parser-0.78.0.tgz#4ec829a97fa68cff6e97691dfff7b6ddebbc187c"
 
 flow-parser@0.84.0:
   version "0.84.0"
@@ -1524,7 +1527,7 @@ lru-cache@^3.2.0:
   dependencies:
     pseudomap "^1.0.1"
 
-lru-cache@^4.0.1, lru-cache@^4.1.1:
+lru-cache@^4.0.1:
   version "4.1.3"
   resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-4.1.3.tgz#a1175cf3496dfc8436c156c334b4955992bce69c"
   dependencies:
@@ -1876,12 +1879,77 @@ prelude-ls@~1.1.2:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/prelude-ls/-/prelude-ls-1.1.2.tgz#21932a549f5e52ffd9a827f570e04be62a97da54"
 
-prettier-plugin-coffeescript@^0.0.4:
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/prettier-plugin-coffeescript/-/prettier-plugin-coffeescript-0.0.4.tgz#e8fc1a25ab8b2607ebc45111ca4f7d19b7c61a6f"
+prettier-plugin-coffeescript@0.0.5:
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/prettier-plugin-coffeescript/-/prettier-plugin-coffeescript-0.0.5.tgz#fd39b907c9993b9e3d81d7145a15d120f012cbc9"
+  integrity sha512-JGcryczICjuW8P6TwWs4EgqPC3oOMi7SGfZoPimNRMV3/pYfZhBRB3B37Ga7oTKaw016Nj9UE4iBMs+mc6SupA==
   dependencies:
-    coffeescript "github:helixbass/coffeescript#d2bada7"
-    prettier "github:helixbass/prettier#f5366a5"
+    coffeescript "github:helixbass/coffeescript#cbaf4303"
+    prettier "github:helixbass/prettier#395e5d5c"
+
+"prettier@github:helixbass/prettier#395e5d5c":
+  version "1.15.0-dev"
+  resolved "https://codeload.github.com/helixbass/prettier/tar.gz/395e5d5cc1b4e833b0d8c9460641ac48e9f8e379"
+  dependencies:
+    "@angular/compiler" "6.1.10"
+    "@babel/code-frame" "7.0.0-beta.46"
+    "@babel/parser" "7.1.2"
+    "@glimmer/syntax" "0.30.3"
+    "@iarna/toml" "2.0.0"
+    angular-estree-parser "1.1.3"
+    angular-html-parser "1.0.0"
+    camelcase "4.1.0"
+    chalk "2.1.0"
+    cjk-regex "2.0.0"
+    cosmiconfig "5.0.6"
+    dashify "0.2.2"
+    dedent "0.7.0"
+    diff "3.2.0"
+    editorconfig "0.15.2"
+    editorconfig-to-prettier "0.0.6"
+    emoji-regex "6.5.1"
+    escape-string-regexp "1.0.5"
+    esutils "2.0.2"
+    find-parent-dir "0.3.0"
+    find-project-root "1.1.1"
+    flow-parser "0.84.0"
+    get-stream "3.0.0"
+    globby "6.1.0"
+    graphql "0.13.2"
+    html-element-attributes "2.0.0"
+    html-styles "1.0.0"
+    html-tag-names "1.1.2"
+    ignore "3.3.7"
+    jest-docblock "23.2.0"
+    json-stable-stringify "1.0.1"
+    leven "2.1.0"
+    lines-and-columns "1.1.6"
+    linguist-languages "6.2.1-dev.20180706"
+    lodash.uniqby "4.7.0"
+    mem "1.1.0"
+    minimatch "3.0.4"
+    minimist "1.2.0"
+    n-readlines "1.0.0"
+    normalize-path "3.0.0"
+    parse-srcset ikatyang/parse-srcset#54eb9c1cb21db5c62b4d0e275d7249516df6f0ee
+    postcss-less "1.1.5"
+    postcss-media-query-parser "0.2.3"
+    postcss-scss "1.0.6"
+    postcss-selector-parser "2.2.3"
+    postcss-values-parser "1.5.0"
+    regexp-util "1.2.2"
+    remark-math "1.0.4"
+    remark-parse "5.0.0"
+    resolve "1.5.0"
+    semver "5.4.1"
+    string-width "2.1.1"
+    typescript "3.0.1"
+    typescript-estree "1.0.0"
+    unicode-regex "2.0.0"
+    unified "6.1.6"
+    vnopts "1.0.2"
+    yaml "1.0.0-rc.8"
+    yaml-unist-parser "1.0.0-rc.4"
 
 "prettier@github:helixbass/prettier#de38bc19":
   version "1.16.0-dev"
@@ -1946,60 +2014,6 @@ prettier-plugin-coffeescript@^0.0.4:
     vnopts "1.0.2"
     yaml "1.0.0-rc.8"
     yaml-unist-parser "1.0.0-rc.4"
-
-"prettier@github:helixbass/prettier#f5366a5":
-  version "1.15.0-dev"
-  resolved "https://codeload.github.com/helixbass/prettier/tar.gz/f5366a54c427f52409f7b7f4aefae8ef1b09df1e"
-  dependencies:
-    "@babel/code-frame" "7.0.0-beta.46"
-    "@babel/parser" "7.0.0-beta.55"
-    "@glimmer/syntax" "0.30.3"
-    "@iarna/toml" "2.0.0"
-    camelcase "4.1.0"
-    chalk "2.1.0"
-    cjk-regex "1.0.2"
-    cosmiconfig "5.0.6"
-    dashify "0.2.2"
-    dedent "0.7.0"
-    diff "3.2.0"
-    editorconfig "0.15.0"
-    editorconfig-to-prettier "0.0.6"
-    emoji-regex "6.5.1"
-    escape-string-regexp "1.0.5"
-    esutils "2.0.2"
-    find-parent-dir "0.3.0"
-    find-project-root "1.1.1"
-    flow-parser "0.78.0"
-    get-stream "3.0.0"
-    globby "6.1.0"
-    graphql "0.13.2"
-    html-tag-names "1.1.2"
-    ignore "3.3.7"
-    jest-docblock "23.2.0"
-    json-stable-stringify "1.0.1"
-    leven "2.1.0"
-    linguist-languages "6.2.1-dev.20180706"
-    lodash.uniqby "4.7.0"
-    mem "1.1.0"
-    minimatch "3.0.4"
-    minimist "1.2.0"
-    normalize-path "3.0.0"
-    parse5 "3.0.3"
-    postcss-less "1.1.5"
-    postcss-media-query-parser "0.2.3"
-    postcss-scss "1.0.6"
-    postcss-selector-parser "2.2.3"
-    postcss-values-parser "1.5.0"
-    remark-parse "5.0.0"
-    resolve "1.5.0"
-    semver "5.4.1"
-    string-width "2.1.1"
-    typescript "3.0.1"
-    typescript-eslint-parser "18.0.0"
-    unicode-regex "1.0.1"
-    unified "6.1.6"
-    yaml ikatyang/yaml#a765c1ee16d6b8a5e715564645f2b85f7e04828b
-    yaml-unist-parser ikatyang/yaml-unist-parser#cd4f73325b3fc02a6d17842d0d9cee0dfc729c9b
 
 "prettier@github:helixbass/prettier#just-format-ast":
   version "1.10.2"
@@ -2493,13 +2507,6 @@ typescript-eslint-parser@13.0.0:
     lodash.unescape "4.0.1"
     semver "5.5.0"
 
-typescript-eslint-parser@18.0.0:
-  version "18.0.0"
-  resolved "https://registry.yarnpkg.com/typescript-eslint-parser/-/typescript-eslint-parser-18.0.0.tgz#3e5055a44980d69e4154350fc5d8b1ab4e2332a8"
-  dependencies:
-    lodash.unescape "4.0.1"
-    semver "5.5.0"
-
 typescript-estree@1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/typescript-estree/-/typescript-estree-1.0.0.tgz#6266f31108d2f12594cb996d0e16d938e3cb83cd"
@@ -2690,20 +2697,9 @@ yaml-unist-parser@1.0.0-rc.4:
     lines-and-columns "^1.1.6"
     tslib "^1.9.1"
 
-yaml-unist-parser@ikatyang/yaml-unist-parser#cd4f73325b3fc02a6d17842d0d9cee0dfc729c9b:
-  version "1.0.0-rc.3"
-  resolved "https://codeload.github.com/ikatyang/yaml-unist-parser/tar.gz/cd4f73325b3fc02a6d17842d0d9cee0dfc729c9b"
-  dependencies:
-    lines-and-columns "^1.1.6"
-    tslib "^1.9.1"
-
 yaml@1.0.0-rc.8:
   version "1.0.0-rc.8"
   resolved "https://registry.yarnpkg.com/yaml/-/yaml-1.0.0-rc.8.tgz#e5604c52b7b07b16e469bcf875ab0dfe08c50d42"
-
-yaml@ikatyang/yaml#a765c1ee16d6b8a5e715564645f2b85f7e04828b:
-  version "1.0.0-rc.7"
-  resolved "https://codeload.github.com/ikatyang/yaml/tar.gz/a765c1ee16d6b8a5e715564645f2b85f7e04828b"
 
 yargs@~3.10.0:
   version "3.10.0"

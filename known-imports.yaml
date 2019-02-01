@@ -21,3 +21,5 @@ whitelist:
     allowed: [filename, named]
     prefix: fixtures
     recursive: true
+blacklist:
+  - blacklisted

@@ -404,4 +404,28 @@ ruleTester.run 'no-undef', rule,
     ]
     settings:
       'known-imports/blank-line-before-local-imports': yes
+  ,
+    # blacklist
+    code: """
+      blacklisted()
+    """
+    output: """
+      blacklisted()
+    """
+    errors: [
+      message: "'blacklisted' is not defined."
+      type: 'Identifier'
+    ]
+  ,
+    # index blacklisted by default
+    code: """
+      index()
+    """
+    output: """
+      index()
+    """
+    errors: [
+      message: "'index' is not defined."
+      type: 'Identifier'
+    ]
   ]
