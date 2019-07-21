@@ -17,7 +17,9 @@ rule = require '../../rules/no-unused-vars'
 # Tests
 #------------------------------------------------------------------------------
 
-parserOptions = sourceType: 'module'
+parserOptions =
+  sourceType: 'module'
+  ecmaVersion: 2017
 
 ruleTester = new RuleTester {parserOptions}
 
@@ -179,9 +181,11 @@ ruleTester.run 'no-unused-vars', rule,
   ,
     code: """
       import * as y from "y";
+      const w = 3;
       export {w};
     """
     output: """
+      const w = 3;
       export {w};
     """
     errors: [definedError 'y']

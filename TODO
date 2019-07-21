@@ -11,3 +11,4 @@
 - relative priority of whitelist filename vs named?
   including priority in the sense of being able to specify a different whitelist for a subdirectory (eg whitelist filenames for src/ but only whitelist named imports for src/util/)
 - clarity about how known-imports/extensions relates to import extensions? rename extensions to known-imports/filename-whitelist-extensions?
+- restrict known import to path/glob? eg make render mean react-testing-library inside test files

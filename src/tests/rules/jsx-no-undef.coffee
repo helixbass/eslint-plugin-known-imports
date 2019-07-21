@@ -159,12 +159,12 @@ ruleTester.run 'jsx-no-undef', rule,
       'known-imports/config-file-path': 'other-known-imports.json'
   ,
     code: """
-      <Empty />
+      const x = <Empty />
     """
     output: """
       import Empty from 'fixtures/Empty'
 
-      <Empty />
+      const x = <Empty />
     """
     errors: [message: "'Empty' is not defined."]
   ]
