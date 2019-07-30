@@ -1,8 +1,9 @@
 fs = require 'fs'
-path = require 'path'
+pathModule = require 'path'
 {last, isString, mergeWith} = require 'lodash'
 {filter: ffilter, mapValues: fmapValues} = require 'lodash/fp'
 {default: ExportMap} = require 'eslint-plugin-import/lib/ExportMap'
+findUp = require 'find-up'
 
 normalizeKnownImports = (knownImports = {}) ->
   return knownImports if knownImports.imports
@@ -20,7 +21,6 @@ mergeKnownImportsField = (objValue, srcValue, key) ->
     ...normalizeKnownImportValues(objValue ? {})
     ...normalizeKnownImportValues(srcValue ? {})
   } if key is 'imports'
-  return
 
 loadConfigFile = (filename) ->
   file = fs.readFileSync filename
@@ -46,15 +46,15 @@ loadKnownImports = ({settings = {}} = {}) ->
             "Couldn't load known imports file '#{configFilePath}'"
           ) unless fs.existsSync configFilePath
           return loadConfigFile configFilePath
-        for filename in [
+        filename = findUp.sync [
           'known-imports.yaml'
           'known-imports.yml'
           'known-imports.json'
           '.known-imports.yaml'
           '.known-imports.yml'
           '.known-imports.json'
-        ] when fs.existsSync(filename)
-          return loadConfigFile filename
+        ]
+        return loadConfigFile filename if filename?
         {}
       knownImportsCache = {
         configFilePath
@@ -110,7 +110,7 @@ createDirectoryCache = ({directory, recursive, extensions, allowed, context}) ->
         scanDir fullPath if recursive
       else
         relativePathWithExtension = fullPath.replace ///^#{directory}/?///, ''
-        {dir: dirName, name, ext} = path.parse relativePathWithExtension
+        {dir: dirName, name, ext} = pathModule.parse relativePathWithExtension
         relativePath = "#{normalizePath dirName}#{name}"
         if 'filename' in allowed
           continue unless ext in extensions

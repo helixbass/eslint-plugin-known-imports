@@ -25,9 +25,9 @@
   },
   "devDependencies": {
     "coffeescript": "github:helixbass/coffeescript#d2bada7",
-    "eslint": "^6.1.0",
+    "eslint": "^5.16.0",
     "eslint-config-prettier": "^2.9.0",
-    "eslint-plugin-coffee": "^0.0.7",
+    "eslint-plugin-coffee": "^0.0.11",
     "eslint-plugin-prettier": "^2.6.2",
     "mocha": "^5.2.0",
     "prettier": "github:helixbass/prettier#de38bc19",
@@ -36,6 +36,7 @@
   "dependencies": {
     "eslint-plugin-import": "^2.14.0",
     "eslint-plugin-react": "^7.10.0",
+    "find-up": "^4.1.0",
     "js-yaml": "^3.12.0",
     "lodash": "^4.17.10"
   }

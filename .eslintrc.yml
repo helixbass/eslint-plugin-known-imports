@@ -3,6 +3,7 @@ plugins:
   - coffee
 extends:
   - plugin:coffee/all
+  - plugin:coffee/prettier
 rules:
   no-unused-vars: &err
     - error
@@ -13,6 +14,14 @@ rules:
   coffee/no-unused-expressions: off
   coffee/no-magic-numbers: off
   coffee/no-implicit-coercion: off
+  coffee/implicit-call: off
+  coffee/no-commonjs: off
+  coffee/vars-on-top: off
+  coffee/max-lines-per-function: off
+  coffee/no-use-before-define: off
+  coffee/block-scoped-var: off
+  coffee/max-depth: off
+  coffee/capitalized-comments: off
 env:
   node: true
   es6: true
