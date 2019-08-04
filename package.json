@@ -36,8 +36,8 @@
   "dependencies": {
     "eslint-plugin-import": "^2.14.0",
     "eslint-plugin-react": "^7.10.0",
-    "find-up": "^4.1.0",
     "js-yaml": "^3.12.0",
-    "lodash": "^4.17.10"
+    "lodash": "^4.17.10",
+    "pkg-dir": "^4.2.0"
   }
 }

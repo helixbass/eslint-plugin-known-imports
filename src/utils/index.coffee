@@ -3,7 +3,7 @@ pathModule = require 'path'
 {last, isString, mergeWith} = require 'lodash'
 {filter: ffilter, mapValues: fmapValues} = require 'lodash/fp'
 {default: ExportMap} = require 'eslint-plugin-import/lib/ExportMap'
-findUp = require 'find-up'
+pkgDir = require 'pkg-dir'
 
 normalizeKnownImports = (knownImports = {}) ->
   return knownImports if knownImports.imports
@@ -27,6 +27,15 @@ loadConfigFile = (filename) ->
   return JSON.parse file if /\.json$/.test filename
   return require('js-yaml').safeLoad file
 
+configFileBasenames = [
+  'known-imports.yaml'
+  'known-imports.yml'
+  'known-imports.json'
+  '.known-imports.yaml'
+  '.known-imports.yml'
+  '.known-imports.json'
+]
+
 knownImportsCache = null
 loadKnownImports = ({settings = {}} = {}) ->
   configFilePath = settings['known-imports/config-file-path']
@@ -46,15 +55,14 @@ loadKnownImports = ({settings = {}} = {}) ->
             "Couldn't load known imports file '#{configFilePath}'"
           ) unless fs.existsSync configFilePath
           return loadConfigFile configFilePath
-        filename = findUp.sync [
-          'known-imports.yaml'
-          'known-imports.yml'
-          'known-imports.json'
-          '.known-imports.yaml'
-          '.known-imports.yml'
-          '.known-imports.json'
-        ]
-        return loadConfigFile filename if filename?
+        for filename in configFileBasenames when fs.existsSync(filename)
+          return loadConfigFile filename
+        projectRootDir = pkgDir.sync()
+        if projectRootDir?
+          for filename in configFileBasenames when (
+            fs.existsSync(pathModule.join projectRootDir, filename)
+          )
+            return loadConfigFile pathModule.join projectRootDir, filename
         {}
       knownImportsCache = {
         configFilePath
@@ -168,7 +176,9 @@ findKnownImportInDirectory = ({
   name
   settings
   context
+  projectRootDir
 }) ->
+  directory = pathModule.join projectRootDir, directory if projectRootDir?
   directory = normalizePath directory
   prefix = normalizePath prefix
   directoryCache = updateDirectoryCache {
@@ -189,6 +199,7 @@ findKnownImportInDirectory = ({
 findKnownImport = ({name, whitelist, settings = {}, context}) ->
   return null unless whitelist?.length
   extensions = settings['known-imports/extensions'] ? ['.js', '.jsx', '.coffee']
+  projectRootDir = pkgDir.sync()
   for directoryConfig in whitelist
     continue unless (
       (found = findKnownImportInDirectory {
@@ -197,6 +208,7 @@ findKnownImport = ({name, whitelist, settings = {}, context}) ->
         extensions
         settings
         context
+        projectRootDir
       })
     )
     return found
