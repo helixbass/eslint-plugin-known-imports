@@ -4,7 +4,7 @@ const filename = process.argv[2]
 
 const lines = fs.readFileSync(filename, 'utf8')
 
-const TYPE_REGEX = /(type|interface) ([A-Z]\w+)\s+/g
+const TYPE_REGEX = /(type|interface) ([A-Z]\w+)(<[^>]+>)?\s+/g
 
 let match
 let types = []
