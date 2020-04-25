@@ -114,7 +114,13 @@ BUILTIN_ES5_TYPES = [
   'Float64ArrayConstructor'
 ]
 
-ALL_BUILTIN_TYPES = [...BUILTIN_UTILITY_TYPES, ...BUILTIN_ES5_TYPES]
+BUILTIN_DOM_TYPES = require '../typenames/dom'
+
+ALL_BUILTIN_TYPES = [
+  ...BUILTIN_UTILITY_TYPES
+  ...BUILTIN_ES5_TYPES
+  ...BUILTIN_DOM_TYPES
+]
 ALL_BUILTIN_TYPES_LOOKUP = do ->
   ret = {}
   (ret[builtinType] = yes) for builtinType in ALL_BUILTIN_TYPES

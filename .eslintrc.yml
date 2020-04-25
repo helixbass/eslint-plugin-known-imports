@@ -35,6 +35,7 @@ rules:
   coffee/multiline-comment-style: off
   coffee/guard-for-in: off
   coffee/no-return-assign: off
+  max-lines: off
 env:
   node: true
   es6: true
