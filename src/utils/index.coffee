@@ -39,37 +39,36 @@ configFileBasenames = [
 knownImportsCache = null
 loadKnownImports = ({settings = {}} = {}) ->
   configFilePath = settings['known-imports/config-file-path']
-  fromFile =
-    if (
-      knownImportsCache?.configFilePath is configFilePath and
-      isFresh {
-        cache: knownImportsCache
-        settings
-      }
-    )
-      knownImportsCache.value
-    else
-      loadedFromFile = normalizeKnownImports do ->
-        if configFilePath
-          throw new Error(
-            "Couldn't load known imports file '#{configFilePath}'"
-          ) unless fs.existsSync configFilePath
-          return loadConfigFile configFilePath
-        for filename in configFileBasenames when fs.existsSync(filename)
-          return loadConfigFile filename
-        projectRootDir = pkgDir.sync()
-        if projectRootDir?
-          for filename in configFileBasenames when (
-            fs.existsSync(pathModule.join projectRootDir, filename)
-          )
-            return loadConfigFile pathModule.join projectRootDir, filename
-        {}
-      knownImportsCache = {
-        configFilePath
-        lastSeen: process.hrtime()
-        value: loadedFromFile
-      }
-      loadedFromFile
+  fromFile = if (
+    knownImportsCache?.configFilePath is configFilePath and
+    isFresh {
+      cache: knownImportsCache
+      settings
+    }
+  )
+    knownImportsCache.value
+  else
+    loadedFromFile = normalizeKnownImports do ->
+      if configFilePath
+        throw new Error(
+          "Couldn't load known imports file '#{configFilePath}'"
+        ) unless fs.existsSync configFilePath
+        return loadConfigFile configFilePath
+      for filename in configFileBasenames when fs.existsSync filename
+        return loadConfigFile filename
+      projectRootDir = pkgDir.sync()
+      if projectRootDir?
+        for filename in configFileBasenames when (
+          fs.existsSync pathModule.join projectRootDir, filename
+        )
+          return loadConfigFile pathModule.join projectRootDir, filename
+      {}
+    knownImportsCache = {
+      configFilePath
+      lastSeen: process.hrtime()
+      value: loadedFromFile
+    }
+    loadedFromFile
   fromConfig = settings['known-imports/imports']
   fromConfig = normalizeKnownImports fromConfig
   mergeWith {}, fromFile, fromConfig, mergeKnownImportsField
@@ -189,7 +188,7 @@ findKnownImportInDirectory = ({
     allowed
     context
   }
-  return null unless (found = directoryCache.get name)
+  return null unless found = directoryCache.get name
   {relativePath, type} = found
   importPath = "#{prefix}#{relativePath}"
   module: importPath
@@ -202,14 +201,14 @@ findKnownImport = ({name, whitelist, settings = {}, context}) ->
   projectRootDir = pkgDir.sync()
   for directoryConfig in whitelist
     continue unless (
-      (found = findKnownImportInDirectory {
+      found = findKnownImportInDirectory {
         ...directoryConfig
         name
         extensions
         settings
         context
         projectRootDir
-      })
+      }
     )
     return found
 
@@ -263,18 +262,20 @@ getAddImportFix = ({name, context, allImports, lastNonlocalImport}) ->
     insertNewImport = (text) ->
       return fixer.insertTextAfter(
         lastExistingImport
-        "\n#{if (
-          knownImport.local and
-          shouldIncludeBlankLineBeforeLocalImports {context}
-        )
-          onlyExistingNonlocalImports =
-            lastNonlocalImport.found is last allImports
-          if onlyExistingNonlocalImports
-            '\n'
+        "\n#{
+          if (
+            knownImport.local and
+            shouldIncludeBlankLineBeforeLocalImports {context}
+          )
+            onlyExistingNonlocalImports =
+              lastNonlocalImport.found is last allImports
+            if onlyExistingNonlocalImports
+              '\n'
+            else
+              ''
           else
             ''
-        else
-          ''}#{text}"
+        }#{text}"
       ) if lastExistingImport
       firstProgramToken = sourceCode.getFirstToken sourceCode.ast,
         # skip directives

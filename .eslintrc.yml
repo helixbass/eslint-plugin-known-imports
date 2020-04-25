@@ -2,13 +2,10 @@ plugins:
   - prettier
   - coffee
 extends:
+  - eslint:recommended
   - plugin:coffee/all
-  - plugin:coffee/prettier
+  - plugin:coffee/prettier-run-as-rule
 rules:
-  no-unused-vars: &err
-    - error
-  no-undef: *err
-  prettier/prettier: [error, {parser: coffeescript, pluginSearchDirs: [.]}]
   prefer-destructuring: [error, {object: true}]
   no-console: error
   coffee/no-unused-expressions: off
@@ -22,6 +19,22 @@ rules:
   coffee/block-scoped-var: off
   coffee/max-depth: off
   coffee/capitalized-comments: off
+  no-sync: off
+  require-unicode-regexp: off
+  global-require: off
+  max-statements: off
+  sort-keys: off
+  no-param-reassign: off
+  no-continue: off
+  no-multi-assign: off
+  coffee/no-cond-assign: off
+  coffee/no-nested-interpolation: off
+  no-warning-comments: off
+  no-inline-comments: off
+  line-comment-position: off
+  coffee/multiline-comment-style: off
+  coffee/guard-for-in: off
+  coffee/no-return-assign: off
 env:
   node: true
   es6: true

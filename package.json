@@ -24,14 +24,14 @@
     "eslint": ">=0.8.0"
   },
   "devDependencies": {
-    "coffeescript": "github:helixbass/coffeescript#d2bada7",
-    "eslint": "^5.16.0",
+    "coffeescript": "^2.5.1",
+    "eslint": "^6.0.0",
     "eslint-config-prettier": "^2.9.0",
-    "eslint-plugin-coffee": "^0.0.11",
+    "eslint-plugin-coffee": "^0.1.12",
     "eslint-plugin-prettier": "^2.6.2",
     "mocha": "^5.2.0",
     "prettier": "github:helixbass/prettier#de38bc19",
-    "prettier-plugin-coffeescript": "^0.0.5"
+    "prettier-plugin-coffeescript": "^0.1.4"
   },
   "dependencies": {
     "eslint-plugin-import": "^2.14.0",
