@@ -195,6 +195,7 @@ module.exports =
 
     ImportDeclaration: (node) -> allImports.push node
     Identifier: (node) ->
+      return if node.name is 'const'
       if node.parent?.type is 'TSTypeReference' and node is node.parent.typeName
         allIdentifiersWhichAreTypeReferences[node.name] = node
       else
