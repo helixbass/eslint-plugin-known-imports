@@ -5,17 +5,17 @@
 
 'use strict'
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Requirements
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 lodash = require 'lodash'
 astUtils = require '../eslint-ast-utils'
 {knownImportExists} = require '../utils'
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Rule Definition
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 module.exports =
   meta:
@@ -113,11 +113,10 @@ module.exports =
         type = 'vars'
         pattern = config.varsIgnorePattern.toString()
 
-      additional =
-        if type
-          " Allowed unused #{type} must match #{pattern}."
-        else
-          ''
+      additional = if type
+        " Allowed unused #{type} must match #{pattern}."
+      else
+        ''
 
       "'{{name}}' is defined but never used.#{additional}"
 
@@ -127,17 +126,16 @@ module.exports =
     # @returns {string} The warning message to be used with this unused variable.
     ###
     getAssignedMessage = ->
-      additional =
-        if config.varsIgnorePattern
-          " Allowed unused vars must match #{config.varsIgnorePattern.toString()}."
-        else
-          ''
+      additional = if config.varsIgnorePattern
+        " Allowed unused vars must match #{config.varsIgnorePattern.toString()}."
+      else
+        ''
 
       "'{{name}}' is assigned a value but never used.#{additional}"
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Helpers
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
 
     STATEMENT_TYPE = /(?:Statement|Declaration)$/
 
@@ -540,9 +538,7 @@ module.exports =
       (fixer) ->
         removeEntireImport = ->
           nextToken = sourceCode.getTokenAfter importDeclaration
-          if (
-            (precedingComments = sourceCode.getCommentsBefore(nextToken)).length
-          )
+          if (precedingComments = sourceCode.getCommentsBefore nextToken).length
             nextToken = precedingComments[0]
           nextTokenIsPrecededByBlankLine =
             sourceCode.text[(nextToken.range[0] - 2)...nextToken.range[0]] is
@@ -603,9 +599,9 @@ module.exports =
         return removeBracesAndPrecedingComma() if isOnlyNamedImport
         fixer.remove importSpecifier
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Public
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
 
     'Program:exit': (programNode) ->
       unusedVars = collectUnusedVariables context.getScope(), []
@@ -620,10 +616,9 @@ module.exports =
         else if unusedVar.defs.length > 0
           context.report
             node: unusedVar.identifiers[0]
-            message:
-              if unusedVar.references.some (ref) -> ref.isWrite()
-                getAssignedMessage()
-              else
-                getDefinedMessage unusedVar
+            message: if unusedVar.references.some((ref) -> ref.isWrite())
+              getAssignedMessage()
+            else
+              getDefinedMessage unusedVar
             data: unusedVar
             fix: getFix {unusedVar, context}

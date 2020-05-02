@@ -6,7 +6,7 @@ extends:
   - plugin:coffee/all
   - plugin:coffee/prettier-run-as-rule
 rules:
-  prefer-destructuring: [error, {object: true}]
+  coffee/prefer-destructuring: [error, {object: true}]
   no-console: error
   coffee/no-unused-expressions: off
   coffee/no-magic-numbers: off
@@ -35,7 +35,11 @@ rules:
   coffee/multiline-comment-style: off
   coffee/guard-for-in: off
   coffee/no-return-assign: off
+  coffee/spread-direction: off
   max-lines: off
+  default-case: off
+  coffee/id-length: off
+  coffee/complexity: off
 env:
   node: true
   es6: true
