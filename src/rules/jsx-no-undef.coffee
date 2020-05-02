@@ -55,11 +55,10 @@ module.exports =
       # Ignore 'this' keyword (also maked as JSXIdentifier when used in JSX)
       return if node.name is 'this'
 
-      scopeType =
-        if not allowGlobals and sourceType is 'module'
-          'module'
-        else
-          'global'
+      scopeType = if not allowGlobals and sourceType is 'module'
+        'module'
+      else
+        'global'
 
       while scope.type isnt scopeType
         scope = scope.upper
