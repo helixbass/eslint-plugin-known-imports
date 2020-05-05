@@ -11,127 +11,127 @@ ruleTester = new RuleTester {parserOptions}
 
 ruleTester.run 'no-undef', rule,
   valid: [
-    code: """
+    code: '''
       import {map as fmap} from 'lodash/fp'
 
       fmap(x => x)
-    """
+    '''
   ]
   invalid: [
     code: 'fmap(x => x)'
-    output: """
+    output: '''
       import {map as fmap} from 'lodash/fp'
 
       fmap(x => x)
-    """
+    '''
     errors: [message: "'fmap' is not defined.", type: 'Identifier']
   ,
-    code: """
+    code: '''
       import a from 'b'
 
       fmap(x => x)
-    """
-    output: """
+    '''
+    output: '''
       import a from 'b'
       import {map as fmap} from 'lodash/fp'
 
       fmap(x => x)
-    """
+    '''
     errors: [message: "'fmap' is not defined.", type: 'Identifier']
   ,
-    code: """
+    code: '''
       import {filter as ffilter} from 'lodash/fp'
 
       fmap(x => x)
-    """
-    output: """
+    '''
+    output: '''
       import {filter as ffilter, map as fmap} from 'lodash/fp'
 
       fmap(x => x)
-    """
+    '''
     errors: [message: "'fmap' is not defined.", type: 'Identifier']
   ,
-    code: """
+    code: '''
       import {filter as ffilter} from 'lodash/fp'
 
       import local from 'local'
 
       numeral(1)
-    """
-    output: """
+    '''
+    output: '''
       import {filter as ffilter} from 'lodash/fp'
       import numeral from 'numeral'
 
       import local from 'local'
 
       numeral(1)
-    """
+    '''
     errors: [message: "'numeral' is not defined.", type: 'Identifier']
   ,
-    code: """
+    code: '''
       import {filter as ffilter} from 'numeral'
 
       import local from 'local'
 
       numeral(1)
-    """
-    output: """
+    '''
+    output: '''
       import numeral, {filter as ffilter} from 'numeral'
 
       import local from 'local'
 
       numeral(1)
-    """
+    '''
     errors: [message: "'numeral' is not defined.", type: 'Identifier']
   ,
-    code: """
+    code: '''
       import def from 'lodash/fp'
 
       fmap(x => x)
-    """
-    output: """
+    '''
+    output: '''
       import def, {map as fmap} from 'lodash/fp'
 
       fmap(x => x)
-    """
+    '''
     errors: [message: "'fmap' is not defined.", type: 'Identifier']
   ,
-    code: """
+    code: '''
       import {filter as ffilter} from 'lodash/fp'
 
       import local from 'local'
 
       withExtractedNavParams()
-    """
-    output: """
+    '''
+    output: '''
       import {filter as ffilter} from 'lodash/fp'
 
       import local from 'local'
       import {withExtractedNavParams} from 'utils/navigation'
 
       withExtractedNavParams()
-    """
+    '''
     errors: [
       message: "'withExtractedNavParams' is not defined."
       type: 'Identifier'
     ]
   ,
     # uses eslintrc config
-    code: """
+    code: '''
       import {filter as ffilter} from 'lodash/fp'
 
       import local from 'local'
 
       localFromConfig()
-    """
-    output: """
+    '''
+    output: '''
       import {filter as ffilter} from 'lodash/fp'
 
       import local from 'local'
       import localFromConfig from '../localFromConfig'
 
       localFromConfig()
-    """
+    '''
     errors: [
       message: "'localFromConfig' is not defined."
       type: 'Identifier'
@@ -144,21 +144,21 @@ ruleTester.run 'no-undef', rule,
           local: yes
   ,
     # merges eslintrc config
-    code: """
+    code: '''
       import {filter as ffilter} from 'lodash/fp'
 
       import local from 'local'
 
       fmap(localFromConfig())
-    """
-    output: """
+    '''
+    output: '''
       import {filter as ffilter, map as fmap} from 'lodash/fp'
 
       import local from 'local'
       import localFromConfig from '../localFromConfig'
 
       fmap(localFromConfig())
-    """
+    '''
     errors: [
       message: "'fmap' is not defined."
       type: 'Identifier'
@@ -174,21 +174,21 @@ ruleTester.run 'no-undef', rule,
           local: yes
   ,
     # eslintrc config fully overrides known import
-    code: """
+    code: '''
       import {filter as ffilter} from 'lodash/fp'
 
       import local from 'local'
 
       numeral(1)
-    """
-    output: """
+    '''
+    output: '''
       import {filter as ffilter} from 'lodash/fp'
       import {numeral} from 'other-numeral'
 
       import local from 'local'
 
       numeral(1)
-    """
+    '''
     errors: [
       message: "'numeral' is not defined."
       type: 'Identifier'
@@ -199,21 +199,21 @@ ruleTester.run 'no-undef', rule,
           module: 'other-numeral'
   ,
     # ...and when using shorthand
-    code: """
+    code: '''
       import {filter as ffilter} from 'lodash/fp'
 
       import local from 'local'
 
       numeral(1)
-    """
-    output: """
+    '''
+    output: '''
       import {filter as ffilter} from 'lodash/fp'
       import {numeral} from 'other-numeral'
 
       import local from 'local'
 
       numeral(1)
-    """
+    '''
     errors: [
       message: "'numeral' is not defined."
       type: 'Identifier'
@@ -223,21 +223,21 @@ ruleTester.run 'no-undef', rule,
         numeral: 'other-numeral'
   ,
     # accepts path to known-imports config
-    code: """
+    code: '''
       import {filter as ffilter} from 'lodash/fp'
 
       import local from 'local'
 
       fmap(1)
-    """
-    output: """
+    '''
+    output: '''
       import {filter as ffilter} from 'lodash/fp'
       import {fmap} from 'somewhere-else'
 
       import local from 'local'
 
       fmap(1)
-    """
+    '''
     errors: [
       message: "'fmap' is not defined."
       type: 'Identifier'
@@ -250,45 +250,45 @@ ruleTester.run 'no-undef', rule,
 
       fmap(x => x)
     '''
-    output: """
+    output: '''
       "use strict"
 
       import {map as fmap} from 'lodash/fp'
 
       fmap(x => x)
-    """
+    '''
     errors: [message: "'fmap' is not defined.", type: 'Identifier']
   ,
     # no blank line before local imports by default
-    code: """
+    code: '''
       import {filter as ffilter} from 'lodash/fp'
 
       withExtractedNavParams()
-    """
-    output: """
+    '''
+    output: '''
       import {filter as ffilter} from 'lodash/fp'
       import {withExtractedNavParams} from 'utils/navigation'
 
       withExtractedNavParams()
-    """
+    '''
     errors: [
       message: "'withExtractedNavParams' is not defined."
       type: 'Identifier'
     ]
   ,
     # blank line before local imports
-    code: """
+    code: '''
       import {filter as ffilter} from 'lodash/fp'
 
       withExtractedNavParams()
-    """
-    output: """
+    '''
+    output: '''
       import {filter as ffilter} from 'lodash/fp'
 
       import {withExtractedNavParams} from 'utils/navigation'
 
       withExtractedNavParams()
-    """
+    '''
     errors: [
       message: "'withExtractedNavParams' is not defined."
       type: 'Identifier'
@@ -296,70 +296,70 @@ ruleTester.run 'no-undef', rule,
     settings:
       'known-imports/blank-line-before-local-imports': yes
   ,
-    code: """
+    code: '''
       d3.chart()
-    """
-    output: """
+    '''
+    output: '''
       import * as d3 from 'd3'
 
       d3.chart()
-    """
+    '''
     errors: [
       message: "'d3' is not defined."
       type: 'Identifier'
     ]
   ,
     # whitelist filename
-    code: """
+    code: '''
       Empty()
-    """
-    output: """
+    '''
+    output: '''
       import Empty from 'fixtures/Empty'
 
       Empty()
-    """
+    '''
     errors: [
       message: "'Empty' is not defined."
       type: 'Identifier'
     ]
   ,
     # whitelist filename nested
-    code: """
+    code: '''
       emptyNest()
-    """
-    output: """
+    '''
+    output: '''
       import emptyNest from 'fixtures/nested/emptyNest'
 
       emptyNest()
-    """
+    '''
     errors: [
       message: "'emptyNest' is not defined."
       type: 'Identifier'
     ]
   ,
     # whitelist named
-    code: """
+    code: '''
       one()
-    """
-    output: """
+    '''
+    output: '''
       import {one} from 'fixtures/named'
 
       one()
-    """
+    '''
     errors: [
       message: "'one' is not defined."
       type: 'Identifier'
     ]
   ,
     # prioritize explicit over whitelist
-    code: """
+    code: '''
       Empty()
-    """
-    output: """
+    '''
+    output: '''
       import {Empty} from 'explicit'
 
       Empty()
-    """
+    '''
     errors: [
       message: "'Empty' is not defined."
       type: 'Identifier'
@@ -369,35 +369,35 @@ ruleTester.run 'no-undef', rule,
         Empty: 'explicit'
   ,
     # don't use local convention by default for whitelist
-    code: """
+    code: '''
       import a from 'b'
 
       Empty()
-    """
-    output: """
+    '''
+    output: '''
       import a from 'b'
       import Empty from 'fixtures/Empty'
 
       Empty()
-    """
+    '''
     errors: [
       message: "'Empty' is not defined."
       type: 'Identifier'
     ]
   ,
     # local convention for whitelist
-    code: """
+    code: '''
       import a from 'b'
 
       Empty()
-    """
-    output: """
+    '''
+    output: '''
       import a from 'b'
 
       import Empty from 'fixtures/Empty'
 
       Empty()
-    """
+    '''
     errors: [
       message: "'Empty' is not defined."
       type: 'Identifier'
@@ -406,26 +406,43 @@ ruleTester.run 'no-undef', rule,
       'known-imports/blank-line-before-local-imports': yes
   ,
     # blacklist
-    code: """
+    code: '''
       blacklisted()
-    """
-    output: """
+    '''
+    output: '''
       blacklisted()
-    """
+    '''
     errors: [
       message: "'blacklisted' is not defined."
       type: 'Identifier'
     ]
   ,
     # index blacklisted by default
-    code: """
+    code: '''
       index()
-    """
-    output: """
+    '''
+    output: '''
       index()
-    """
+    '''
     errors: [
       message: "'index' is not defined."
       type: 'Identifier'
     ]
+  ,
+    # relative paths
+    code: '''
+      Empty()
+    '''
+    settings:
+      'known-imports/relative-paths': yes
+    output: '''
+      import Empty from './lib/tests/fixtures/Empty'
+
+      Empty()
+    '''
+    errors: [
+      message: "'Empty' is not defined."
+      type: 'Identifier'
+    ]
+    filename: 'foo.js'
   ]

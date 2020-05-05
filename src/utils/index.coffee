@@ -1,6 +1,6 @@
 fs = require 'fs'
 pathModule = require 'path'
-{last, isString, mergeWith} = require 'lodash'
+{last, isString, mergeWith, startsWith} = require 'lodash'
 {filter: ffilter, mapValues: fmapValues} = require 'lodash/fp'
 {default: ExportMap} = require 'eslint-plugin-import/lib/ExportMap'
 pkgDir = require 'pkg-dir'
@@ -118,11 +118,12 @@ createDirectoryCache = ({directory, recursive, extensions, allowed, context}) ->
       else
         relativePathWithExtension = fullPath.replace ///^#{directory}/?///, ''
         {dir: dirName, name, ext} = pathModule.parse relativePathWithExtension
-        relativePath = "#{normalizePath dirName}#{name}"
+        prefixRelativePath = "#{normalizePath dirName}#{name}"
         if 'filename' in allowed
           continue unless ext in extensions
           cache.set name, {
-            relativePath
+            prefixRelativePath
+            fullPath
             type: 'filename'
           }
         if 'named' in allowed
@@ -135,7 +136,8 @@ createDirectoryCache = ({directory, recursive, extensions, allowed, context}) ->
               namedExport isnt 'default'
             )
               cache.set namedExport, {
-                relativePath
+                prefixRelativePath
+                fullPath
                 type: 'named'
               }
   scanDir directory
@@ -166,6 +168,19 @@ normalizePath = (path) ->
   return path if /// / $ ///.test path
   "#{path}/"
 
+getExtensions = ({settings}) ->
+  settings['known-imports/extensions'] ? [
+    '.js'
+    '.jsx'
+    '.coffee'
+    '.ts'
+    '.tsx'
+  ]
+
+ensureLeadingDot = (path) ->
+  return "./#{path}" if path.length and not startsWith path, '.'
+  path
+
 findKnownImportInDirectory = ({
   directory
   allowed = ['filename']
@@ -189,15 +204,29 @@ findKnownImportInDirectory = ({
     context
   }
   return null unless found = directoryCache.get name
-  {relativePath, type} = found
-  importPath = "#{prefix}#{relativePath}"
+  {prefixRelativePath, fullPath, type} = found
+  filename = context.getFilename()
+  importPath = if settings['known-imports/relative-paths']
+    relativePath = pathModule.relative pathModule.dirname(filename), fullPath
+    extension = pathModule.extname relativePath
+    ensureLeadingDot(
+      if extension in extensions
+        pathModule.join(
+          pathModule.dirname relativePath
+          pathModule.basename relativePath, extension
+        )
+      else
+        relativePath
+    )
+  else
+    "#{prefix}#{prefixRelativePath}"
   module: importPath
   default: type is 'filename'
   local: yes
 
 findKnownImport = ({name, whitelist, settings = {}, context}) ->
   return null unless whitelist?.length
-  extensions = settings['known-imports/extensions'] ? ['.js', '.jsx', '.coffee']
+  extensions = getExtensions {settings}
   projectRootDir = pkgDir.sync()
   for directoryConfig in whitelist
     continue unless (
