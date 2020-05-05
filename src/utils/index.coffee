@@ -107,7 +107,14 @@ getExportMap = ({path, context: {settings, parserPath, parserOptions}}) ->
     parserOptions
   }
 
-createDirectoryCache = ({directory, recursive, extensions, allowed, context}) ->
+createDirectoryCache = ({
+  directory
+  recursive
+  extensions
+  allowed
+  context
+  context: {settings}
+}) ->
   cache = new Map()
   scanDir = (dir) ->
     dir = normalizePath dir
@@ -121,11 +128,18 @@ createDirectoryCache = ({directory, recursive, extensions, allowed, context}) ->
         prefixRelativePath = "#{normalizePath dirName}#{name}"
         if 'filename' in allowed
           continue unless ext in extensions
-          cache.set name, {
-            prefixRelativePath
-            fullPath
-            type: 'filename'
-          }
+          cache.set(
+            if settings['known-imports/case-insensitive']
+              name.toLowerCase
+            else
+              name
+          ,
+            {
+              prefixRelativePath
+              fullPath
+              type: 'filename'
+            }
+          )
         if 'named' in allowed
           exports = getExportMap {
             path: fullPath
@@ -203,7 +217,15 @@ findKnownImportInDirectory = ({
     allowed
     context
   }
-  return null unless found = directoryCache.get name
+
+  return null unless (
+    found = directoryCache.get(
+      if settings['known-imports/case-insensitive']
+        name.toLowerCase()
+      else
+        name
+    )
+  )
   {prefixRelativePath, fullPath, type} = found
   filename = context.getFilename()
   importPath = if settings['known-imports/relative-paths']
