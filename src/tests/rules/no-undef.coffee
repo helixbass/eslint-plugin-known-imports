@@ -323,7 +323,7 @@ ruleTester.run 'no-undef', rule,
       type: 'Identifier'
     ]
   ,
-    # whitelist filename case insensitively (case-insensitive rule off)
+    # whitelist filename case insensitively (case-insensitive-whitelist-filename rule off)
     code: '''
       Empty2()
     '''
@@ -335,7 +335,7 @@ ruleTester.run 'no-undef', rule,
       type: 'Identifier'
     ]
   ,
-    # whitelist filename case insensitively (case-insensitive rule on)
+    # whitelist filename case insensitively (case-insensitive-whitelist-filename rule on)
     code: '''
       Empty2()
     '''
@@ -348,7 +348,7 @@ ruleTester.run 'no-undef', rule,
       message: "'Empty2' is not defined."
       type: 'Identifier'
     ]
-    settings: 'known-imports/case-insensitive': true
+    settings: 'known-imports/case-insensitive-whitelist-filename': true
   ,
     # whitelist filename nested
     code: '''
@@ -377,6 +377,19 @@ ruleTester.run 'no-undef', rule,
       message: "'one' is not defined."
       type: 'Identifier'
     ]
+  ,
+    # whitelist named always case sensitive
+    code: '''
+      One()
+    '''
+    output: '''
+      One()
+    '''
+    errors: [
+      message: "'One' is not defined."
+      type: 'Identifier'
+    ]
+    settings: 'known-imports/case-insensitive-whitelist-filename': true
   ,
     # prioritize explicit over whitelist
     code: '''

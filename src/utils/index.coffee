@@ -129,8 +129,8 @@ createDirectoryCache = ({
         if 'filename' in allowed
           continue unless ext in extensions
           cache.set(
-            if settings['known-imports/case-insensitive']
-              name.toLowerCase
+            if settings['known-imports/case-insensitive-whitelist-filename']
+              name.toLowerCase()
             else
               name
           ,
@@ -218,15 +218,15 @@ findKnownImportInDirectory = ({
     context
   }
 
-  return null unless (
-    found = directoryCache.get(
-      if settings['known-imports/case-insensitive']
-        name.toLowerCase()
-      else
-        name
-    )
+  foundExact = directoryCache.get name
+  foundCaseInsensitive = if (
+    settings['known-imports/case-insensitive-whitelist-filename']
   )
+    directoryCache.get name.toLowerCase()
+  return null unless found = foundExact or foundCaseInsensitive
   {prefixRelativePath, fullPath, type} = found
+  return null if type isnt 'filename' and not foundExact
+
   filename = context.getFilename()
   importPath = if settings['known-imports/relative-paths']
     relativePath = pathModule.relative pathModule.dirname(filename), fullPath
