@@ -1,7 +1,12 @@
 fs = require 'fs'
 pathModule = require 'path'
-{last, isString, mergeWith, startsWith} = require 'lodash'
-{filter: ffilter, mapValues: fmapValues} = require 'lodash/fp'
+{last, isString, mergeWith, startsWith, first} = require 'lodash'
+{
+  filter: ffilter
+  mapValues: fmapValues
+  sortBy
+  takeWhile
+} = require 'lodash/fp'
 {default: ExportMap} = require 'eslint-plugin-import/lib/ExportMap'
 pkgDir = require 'pkg-dir'
 
@@ -107,6 +112,10 @@ getExportMap = ({path, context: {settings, parserPath, parserOptions}}) ->
     parserOptions
   }
 
+appendToCacheKey = (cache, key, value) ->
+  currentValue = cache.get(key) ? []
+  cache.set key, [...currentValue, value]
+
 createDirectoryCache = ({
   directory
   recursive
@@ -128,7 +137,8 @@ createDirectoryCache = ({
         prefixRelativePath = "#{normalizePath dirName}#{name}"
         if 'filename' in allowed
           continue unless ext in extensions
-          cache.set(
+          appendToCacheKey(
+            cache
             if settings['known-imports/case-insensitive-whitelist-filename']
               name.toLowerCase()
             else
@@ -140,6 +150,7 @@ createDirectoryCache = ({
               type: 'filename'
             }
           )
+
         if 'named' in allowed
           exports = getExportMap {
             path: fullPath
@@ -149,7 +160,7 @@ createDirectoryCache = ({
             for namedExport from exports.namespace.keys() when (
               namedExport isnt 'default'
             )
-              cache.set namedExport, {
+              appendToCacheKey cache, namedExport, {
                 prefixRelativePath
                 fullPath
                 type: 'named'
@@ -218,18 +229,66 @@ findKnownImportInDirectory = ({
     context
   }
 
-  foundExact = directoryCache.get name
-  foundCaseInsensitive = if (
-    settings['known-imports/case-insensitive-whitelist-filename']
+  foundExact = directoryCache.get(name) ? []
+  foundCaseInsensitive = (
+    if settings['known-imports/case-insensitive-whitelist-filename']
+      directoryCache.get(name.toLowerCase()) ? []
+    else
+      []
+  ).filter ({type}) -> type is 'filename'
+  hasAmbiguousMatches =
+    foundExact.length > 1 or
+    (not foundExact.length and foundCaseInsensitive.length > 1)
+  return null if (
+    settings['known-imports/should-autoimport-ambiguous-imports'] is no and
+    hasAmbiguousMatches
   )
-    directoryCache.get name.toLowerCase()
-  return null unless found = foundExact or foundCaseInsensitive
-  {prefixRelativePath, fullPath, type} = found
-  return null if type isnt 'filename' and not foundExact
-
   filename = context.getFilename()
+  getRelativePath = ({fullPath}) ->
+    pathModule.relative pathModule.dirname(filename), fullPath
+  getDotsPrefixLength = (match) ->
+    [
+      _ # eslint-disable-line coffee/no-unused-vars
+      dotsPrefix
+    ] = ///
+      ^
+      (
+        (?:
+          \.\./
+        ) *
+      )
+    ///.exec getRelativePath match
+    dotsPrefix.length
+  found = if hasAmbiguousMatches
+    ambiguousMatches = if foundExact.length
+      foundExact
+    else
+      foundCaseInsensitive
+    closestFirst = sortBy(getDotsPrefixLength) ambiguousMatches
+    shortestDotsPrefixLength = getDotsPrefixLength closestFirst[0]
+    haveSameSharedParentDirectory =
+      takeWhile((match) ->
+        getDotsPrefixLength(match) is shortestDotsPrefixLength
+      ) closestFirst
+    first(
+      sortBy((match) ->
+        getRelativePath(match).replace(
+          ///
+          /
+          [^/] +
+          $
+        ///
+          ''
+        ).length
+      ) haveSameSharedParentDirectory
+    )
+  else
+    [...foundExact, ...foundCaseInsensitive][0]
+  return null unless found
+  {prefixRelativePath, type} = found
+
   importPath = if settings['known-imports/relative-paths']
-    relativePath = pathModule.relative pathModule.dirname(filename), fullPath
+    relativePath = getRelativePath found
     extension = pathModule.extname relativePath
     ensureLeadingDot(
       if extension in extensions
