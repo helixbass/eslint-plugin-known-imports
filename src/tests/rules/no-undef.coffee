@@ -476,7 +476,7 @@ ruleTester.run 'no-undef', rule,
     settings:
       'known-imports/relative-paths': yes
     output: '''
-      import Empty from './lib/tests/fixtures/Empty'
+      import Empty from './tests/fixtures/Empty'
 
       Empty()
     '''
@@ -484,20 +484,35 @@ ruleTester.run 'no-undef', rule,
       message: "'Empty' is not defined."
       type: 'Identifier'
     ]
-    filename: 'foo.js'
+    filename: 'lib/foo.js'
   ,
-    # should-autoimport-ambiguous-imports setting
+    # prefer "nearest" import in terms of parent directories
     code: '''
       ambiguous()
     '''
-    settings:
-      'known-imports/should-autoimport-ambiguous-imports': false
     output: '''
+      import {ambiguous} from 'fixtures/nested/ambiguous2'
+
       ambiguous()
     '''
     errors: [
       message: "'ambiguous' is not defined."
       type: 'Identifier'
     ]
-    filename: 'foo.js'
+    filename: 'lib/tests/fixtures/nested/foo.js'
+  ,
+    # prefer "nearest" import in terms of nested directories
+    code: '''
+      ambiguous()
+    '''
+    output: '''
+      import {ambiguous} from 'fixtures/ambiguous1'
+
+      ambiguous()
+    '''
+    errors: [
+      message: "'ambiguous' is not defined."
+      type: 'Identifier'
+    ]
+    filename: 'lib/foo.js'
   ]
