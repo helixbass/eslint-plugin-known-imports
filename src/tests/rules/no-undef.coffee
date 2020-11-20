@@ -485,4 +485,19 @@ ruleTester.run 'no-undef', rule,
       type: 'Identifier'
     ]
     filename: 'foo.js'
+  ,
+    # should-autoimport-ambiguous-imports setting
+    code: '''
+      ambiguous()
+    '''
+    settings:
+      'known-imports/should-autoimport-ambiguous-imports': false
+    output: '''
+      ambiguous()
+    '''
+    errors: [
+      message: "'ambiguous' is not defined."
+      type: 'Identifier'
+    ]
+    filename: 'foo.js'
   ]

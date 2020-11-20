@@ -107,6 +107,10 @@ getExportMap = ({path, context: {settings, parserPath, parserOptions}}) ->
     parserOptions
   }
 
+appendToCacheKey = (cache, key, value) ->
+  currentValue = cache.get(key) ? []
+  cache.set key, [...currentValue, value]
+
 createDirectoryCache = ({
   directory
   recursive
@@ -128,7 +132,8 @@ createDirectoryCache = ({
         prefixRelativePath = "#{normalizePath dirName}#{name}"
         if 'filename' in allowed
           continue unless ext in extensions
-          cache.set(
+          appendToCacheKey(
+            cache
             if settings['known-imports/case-insensitive-whitelist-filename']
               name.toLowerCase()
             else
@@ -140,6 +145,7 @@ createDirectoryCache = ({
               type: 'filename'
             }
           )
+
         if 'named' in allowed
           exports = getExportMap {
             path: fullPath
@@ -149,7 +155,7 @@ createDirectoryCache = ({
             for namedExport from exports.namespace.keys() when (
               namedExport isnt 'default'
             )
-              cache.set namedExport, {
+              appendToCacheKey cache, namedExport, {
                 prefixRelativePath
                 fullPath
                 type: 'named'
@@ -218,14 +224,21 @@ findKnownImportInDirectory = ({
     context
   }
 
-  foundExact = directoryCache.get name
+  foundExact = directoryCache.get(name) ? []
   foundCaseInsensitive = if (
     settings['known-imports/case-insensitive-whitelist-filename']
   )
-    directoryCache.get name.toLowerCase()
-  return null unless found = foundExact or foundCaseInsensitive
+    directoryCache.get(name.toLowerCase()) ? []
+  else
+    []
+  return null if (
+    settings['known-imports/should-autoimport-ambiguous-imports'] is no and
+    (foundExact.length > 1 or
+      (not foundExact.length and foundCaseInsensitive.length > 1))
+  )
+  return null unless found = foundExact[0] ? foundCaseInsensitive[0]
   {prefixRelativePath, fullPath, type} = found
-  return null if type isnt 'filename' and not foundExact
+  return null if type isnt 'filename' and not foundExact.length
 
   filename = context.getFilename()
   importPath = if settings['known-imports/relative-paths']
