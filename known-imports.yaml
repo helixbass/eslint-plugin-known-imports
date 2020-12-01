@@ -21,5 +21,7 @@ whitelist:
     allowed: [filename, named]
     prefix: fixtures
     recursive: true
+    ignore:
+      - ignored1.js
 blacklist:
   - blacklisted

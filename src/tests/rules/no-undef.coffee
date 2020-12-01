@@ -515,4 +515,17 @@ ruleTester.run 'no-undef', rule,
       type: 'Identifier'
     ]
     filename: 'lib/foo.js'
+  ,
+    # ignore option: filename import + filename glob
+    code: '''
+      ignored1()
+    '''
+    output: '''
+      ignored1()
+    '''
+    errors: [
+      message: "'ignored1' is not defined."
+      type: 'Identifier'
+    ]
+    filename: 'lib/foo.js'
   ]

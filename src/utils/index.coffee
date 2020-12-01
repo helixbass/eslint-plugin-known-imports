@@ -1,11 +1,13 @@
 fs = require 'fs'
 pathModule = require 'path'
-{last, isString, mergeWith, startsWith, first} = require 'lodash'
+glob = require 'glob'
+{last, isString, mergeWith, startsWith, first, isArray} = require 'lodash'
 {
   filter: ffilter
   mapValues: fmapValues
   sortBy
   takeWhile
+  flatMap
 } = require 'lodash/fp'
 {default: ExportMap} = require 'eslint-plugin-import/lib/ExportMap'
 pkgDir = require 'pkg-dir'
@@ -123,8 +125,15 @@ createDirectoryCache = ({
   allowed
   context
   context: {settings}
+  ignore
 }) ->
   cache = new Map()
+  ignoreFiles = do ->
+    return [] unless ignore?
+    doGlob = (ignorePattern) ->
+      glob.sync ignorePattern, matchBase: yes, cwd: directory
+    return flatMap doGlob, ignore if isArray ignore
+    doGlob ignore
   scanDir = (dir) ->
     dir = normalizePath dir
     for file in fs.readdirSync dir
@@ -133,6 +142,7 @@ createDirectoryCache = ({
         scanDir fullPath if recursive
       else
         relativePathWithExtension = fullPath.replace ///^#{directory}/?///, ''
+        continue if relativePathWithExtension in ignoreFiles
         {dir: dirName, name, ext} = pathModule.parse relativePathWithExtension
         prefixRelativePath = "#{normalizePath dirName}#{name}"
         if 'filename' in allowed
@@ -177,6 +187,7 @@ updateDirectoryCache = ({
   settings
   allowed
   context
+  ignore
 }) ->
   directoryCache = directoryCaches[directory]
   directoryCache = directoryCaches[directory] = createDirectoryCache {
@@ -185,6 +196,7 @@ updateDirectoryCache = ({
     extensions
     allowed
     context
+    ignore
   } unless isFresh {cache: directoryCache, settings}
   directoryCache.value
 
@@ -216,6 +228,7 @@ findKnownImportInDirectory = ({
   settings
   context
   projectRootDir
+  ignore
 }) ->
   directory = pathModule.join projectRootDir, directory if projectRootDir?
   directory = normalizePath directory
@@ -227,6 +240,7 @@ findKnownImportInDirectory = ({
     settings
     allowed
     context
+    ignore
   }
 
   foundExact = directoryCache.get(name) ? []
