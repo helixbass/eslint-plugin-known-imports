@@ -1,6 +1,7 @@
 fs = require 'fs'
 pathModule = require 'path'
-{last, isString, mergeWith, startsWith, first} = require 'lodash'
+picomatch = require 'picomatch'
+{last, isString, mergeWith, startsWith, first, isArray} = require 'lodash'
 {
   filter: ffilter
   mapValues: fmapValues
@@ -116,6 +117,19 @@ appendToCacheKey = (cache, key, value) ->
   currentValue = cache.get(key) ? []
   cache.set key, [...currentValue, value]
 
+ensureArray = (val) ->
+  return val if isArray val
+  [val]
+
+NON_ROOT_DIRECTORY_IGNORE_PATTERN_REGEX = ///
+  ^
+  [^/]
+  [^.] *
+  $
+///
+getIsNonRootDirectoryPattern = (ignorePattern) ->
+  NON_ROOT_DIRECTORY_IGNORE_PATTERN_REGEX.test ignorePattern
+
 createDirectoryCache = ({
   directory
   recursive
@@ -123,16 +137,48 @@ createDirectoryCache = ({
   allowed
   context
   context: {settings}
+  ignore
 }) ->
   cache = new Map()
+  getIgnoreMatcher = (
+    {shouldOnlyMatchNonRootDirectoryPatterns = no, basename = no} = {}
+  ) ->
+    unless ignore?
+      return -> no
+    picomatch(
+      if shouldOnlyMatchNonRootDirectoryPatterns
+        ensureArray ignore
+          .filter getIsNonRootDirectoryPattern
+          .map((ignorePattern) ->
+            ignorePattern.replace /// \/ $ ///, ''
+          )
+      else
+        ensureArray(ignore).map((ignorePattern) ->
+          ignorePattern.replace(/// ^ \/ ///, '').replace /// \/ $ ///, ''
+        )
+    ,
+      {
+        contains: shouldOnlyMatchNonRootDirectoryPatterns
+        cwd: directory
+        basename
+      }
+    )
+  ignoreMatcher = getIgnoreMatcher basename: yes
+  ignoreMatcherNoBasename = getIgnoreMatcher()
+  ignoreMatcherContains = getIgnoreMatcher(
+    shouldOnlyMatchNonRootDirectoryPatterns: yes
+  )
   scanDir = (dir) ->
     dir = normalizePath dir
     for file in fs.readdirSync dir
       fullPath = dir + file
+      relativePathWithExtension = fullPath.replace ///^#{directory}/?///, ''
       if fs.statSync(fullPath).isDirectory()
+        continue if ignoreMatcherNoBasename relativePathWithExtension
+        continue if ignoreMatcherContains relativePathWithExtension
         scanDir fullPath if recursive
       else
-        relativePathWithExtension = fullPath.replace ///^#{directory}/?///, ''
+        continue if ignoreMatcher relativePathWithExtension
         {dir: dirName, name, ext} = pathModule.parse relativePathWithExtension
         prefixRelativePath = "#{normalizePath dirName}#{name}"
         if 'filename' in allowed
@@ -177,6 +223,7 @@ updateDirectoryCache = ({
   settings
   allowed
   context
+  ignore
 }) ->
   directoryCache = directoryCaches[directory]
   directoryCache = directoryCaches[directory] = createDirectoryCache {
@@ -185,6 +232,7 @@ updateDirectoryCache = ({
     extensions
     allowed
     context
+    ignore
   } unless isFresh {cache: directoryCache, settings}
   directoryCache.value
 
@@ -216,6 +264,7 @@ findKnownImportInDirectory = ({
   settings
   context
   projectRootDir
+  ignore
 }) ->
   directory = pathModule.join projectRootDir, directory if projectRootDir?
   directory = normalizePath directory
@@ -227,6 +276,7 @@ findKnownImportInDirectory = ({
     settings
     allowed
     context
+    ignore
   }
 
   foundExact = directoryCache.get(name) ? []

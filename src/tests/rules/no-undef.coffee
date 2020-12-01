@@ -515,4 +515,71 @@ ruleTester.run 'no-undef', rule,
       type: 'Identifier'
     ]
     filename: 'lib/foo.js'
+  ,
+    # ignore option: filename import + filename glob
+    code: '''
+      ignored1()
+    '''
+    output: '''
+      ignored1()
+    '''
+    errors: [
+      message: "'ignored1' is not defined."
+      type: 'Identifier'
+    ]
+    filename: 'lib/foo.js'
+  ,
+    # ignore option: named import + filename glob
+    code: '''
+      ignored1Named()
+    '''
+    output: '''
+      ignored1Named()
+    '''
+    errors: [
+      message: "'ignored1Named' is not defined."
+      type: 'Identifier'
+    ]
+    filename: 'lib/foo.js'
+  ,
+    # ignore option: filename import + directory glob
+    code: '''
+      ign()
+    '''
+    output: '''
+      ign()
+    '''
+    errors: [
+      message: "'ign' is not defined."
+      type: 'Identifier'
+    ]
+    filename: 'lib/foo.js'
+  ,
+    # ignore option: filename import + leading-slash directory glob + nested import
+    code: '''
+      ignTopLevelNested()
+    '''
+    output: '''
+      import ignTopLevelNested from 'fixtures/nested/ignoredTopLevel/ignTopLevelNested'
+
+      ignTopLevelNested()
+    '''
+    errors: [
+      message: "'ignTopLevelNested' is not defined."
+      type: 'Identifier'
+    ]
+    filename: 'lib/foo.js'
+  ,
+    # ignore option: filename import + leading-slash directory glob + non-nested import
+    code: '''
+      ignTopLevel()
+    '''
+    output: '''
+      ignTopLevel()
+    '''
+    errors: [
+      message: "'ignTopLevel' is not defined."
+      type: 'Identifier'
+    ]
+    filename: 'lib/foo.js'
   ]
