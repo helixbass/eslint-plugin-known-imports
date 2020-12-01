@@ -1,13 +1,12 @@
 fs = require 'fs'
 pathModule = require 'path'
-glob = require 'glob'
+picomatch = require 'picomatch'
 {last, isString, mergeWith, startsWith, first, isArray} = require 'lodash'
 {
   filter: ffilter
   mapValues: fmapValues
   sortBy
   takeWhile
-  flatMap
 } = require 'lodash/fp'
 {default: ExportMap} = require 'eslint-plugin-import/lib/ExportMap'
 pkgDir = require 'pkg-dir'
@@ -118,6 +117,19 @@ appendToCacheKey = (cache, key, value) ->
   currentValue = cache.get(key) ? []
   cache.set key, [...currentValue, value]
 
+ensureArray = (val) ->
+  return val if isArray val
+  [val]
+
+NON_ROOT_DIRECTORY_IGNORE_PATTERN_REGEX = ///
+  ^
+  [^/]
+  [^.] *
+  $
+///
+getIsNonRootDirectoryPattern = (ignorePattern) ->
+  NON_ROOT_DIRECTORY_IGNORE_PATTERN_REGEX.test ignorePattern
+
 createDirectoryCache = ({
   directory
   recursive
@@ -128,21 +140,45 @@ createDirectoryCache = ({
   ignore
 }) ->
   cache = new Map()
-  ignoreFiles = do ->
-    return [] unless ignore?
-    doGlob = (ignorePattern) ->
-      glob.sync ignorePattern, matchBase: yes, cwd: directory
-    return flatMap doGlob, ignore if isArray ignore
-    doGlob ignore
+  getIgnoreMatcher = (
+    {shouldOnlyMatchNonRootDirectoryPatterns = no, basename = no} = {}
+  ) ->
+    unless ignore?
+      return -> no
+    picomatch(
+      if shouldOnlyMatchNonRootDirectoryPatterns
+        ensureArray ignore
+          .filter getIsNonRootDirectoryPattern
+          .map((ignorePattern) ->
+            ignorePattern.replace /// \/ $ ///, ''
+          )
+      else
+        ensureArray(ignore).map((ignorePattern) ->
+          ignorePattern.replace(/// ^ \/ ///, '').replace /// \/ $ ///, ''
+        )
+    ,
+      {
+        contains: shouldOnlyMatchNonRootDirectoryPatterns
+        cwd: directory
+        basename
+      }
+    )
+  ignoreMatcher = getIgnoreMatcher basename: yes
+  ignoreMatcherNoBasename = getIgnoreMatcher()
+  ignoreMatcherContains = getIgnoreMatcher(
+    shouldOnlyMatchNonRootDirectoryPatterns: yes
+  )
   scanDir = (dir) ->
     dir = normalizePath dir
     for file in fs.readdirSync dir
       fullPath = dir + file
+      relativePathWithExtension = fullPath.replace ///^#{directory}/?///, ''
       if fs.statSync(fullPath).isDirectory()
+        continue if ignoreMatcherNoBasename relativePathWithExtension
+        continue if ignoreMatcherContains relativePathWithExtension
         scanDir fullPath if recursive
       else
-        relativePathWithExtension = fullPath.replace ///^#{directory}/?///, ''
-        continue if relativePathWithExtension in ignoreFiles
+        continue if ignoreMatcher relativePathWithExtension
         {dir: dirName, name, ext} = pathModule.parse relativePathWithExtension
         prefixRelativePath = "#{normalizePath dirName}#{name}"
         if 'filename' in allowed

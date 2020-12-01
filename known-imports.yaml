@@ -23,5 +23,7 @@ whitelist:
     recursive: true
     ignore:
       - ignored1.js
+      - ignoredNested/
+      - /ignoredTopLevel/
 blacklist:
   - blacklisted
