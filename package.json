@@ -1,0 +1,47 @@
+{
+  "name": "eslint-plugin-known-imports",
+  "version": "0.1.0-dev.1",
+  "description": "ESLint plugin to generate missing/remove unused project-specific known imports",
+  "main": "lib/index.js",
+  "repository": "https://github.com/helixbass/eslint-plugin-known-imports",
+  "author": "Julian Rosse <julian@helixbass.net> (http://helixbass.net/)",
+  "license": "MIT",
+  "scripts": {
+    "lint": "eslint src/*.coffee src/*/*.coffee",
+    "test": "mocha 'lib/tests/{,!(fixtures)/**}/*.js'",
+    "watch": "coffee -o lib/ -wc src/",
+    "prepublish": "coffee -o lib/ -c src/"
+  },
+  "files": [
+    "lib"
+  ],
+  "keywords": [
+    "eslint",
+    "eslint-plugin",
+    "eslintplugin"
+  ],
+  "peerDependencies": {
+    "eslint": ">=0.8.0"
+  },
+  "devDependencies": {
+    "coffeescript": "^2.5.1",
+    "eslint": "^6.0.0",
+    "eslint-config-prettier": "^2.9.0",
+    "eslint-plugin-coffee": "github:helixbass/eslint-plugin-coffee#eslint-plugin-coffee-v0.1.15-dev.1-gitpkg",
+    "eslint-plugin-prettier": "^2.6.2",
+    "mocha": "^5.2.0",
+    "prettier": "github:helixbass/prettier#b8818ebd",
+    "prettier-plugin-coffeescript": "^0.1.4"
+  },
+  "dependencies": {
+    "@typescript-eslint/eslint-plugin": "^4.15.1",
+    "@typescript-eslint/experimental-utils": "^4.15.1",
+    "@typescript-eslint/scope-manager": "^4.15.1",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-react": "^7.10.0",
+    "js-yaml": "^3.12.0",
+    "lodash": "^4.17.10",
+    "picomatch": "^2.2.2",
+    "pkg-dir": "^4.2.0"
+  }
+}
