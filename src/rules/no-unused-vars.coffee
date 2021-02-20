@@ -11,7 +11,7 @@
 
 lodash = require 'lodash'
 astUtils = require '../eslint-ast-utils'
-{knownImportExists} = require '../utils'
+{getRemoveImportFix} = require '../utils'
 
 # ------------------------------------------------------------------------------
 # Rule Definition
@@ -524,81 +524,6 @@ module.exports =
         comment.range[0] + 2 + getColumnInComment variable, comment
       )
 
-    getFix = ({unusedVar}) ->
-      def = unusedVar.defs[0]
-      return null unless def.type is 'ImportBinding'
-      return null if (
-        config.onlyRemoveKnownImports and
-        not knownImportExists {name: unusedVar.name, context}
-      )
-
-      importDeclaration = def.parent
-      importSpecifier = def.node
-
-      (fixer) ->
-        removeEntireImport = ->
-          nextToken = sourceCode.getTokenAfter importDeclaration
-          if (precedingComments = sourceCode.getCommentsBefore nextToken).length
-            nextToken = precedingComments[0]
-          nextTokenIsPrecededByBlankLine =
-            sourceCode.text[(nextToken.range[0] - 2)...nextToken.range[0]] is
-            '\n\n'
-          importIsAtBeginningOfFile = not sourceCode.getTokenBefore(
-            importDeclaration
-          )
-          fixer.removeRange [
-            importDeclaration.range[0]
-            if nextTokenIsPrecededByBlankLine and not importIsAtBeginningOfFile
-              nextToken.range[0] - 1
-            else
-              nextToken.range[0]
-          ]
-
-        removeThroughFollowingComma = ({commaToken}) ->
-          followingToken = sourceCode.getTokenAfter commaToken
-          return fixer.removeRange [
-            importSpecifier.range[0]
-            followingToken.range[0]
-          ]
-
-        removeThroughPrecedingComma = ({commaToken}) ->
-          beforeToken = sourceCode.getTokenBefore commaToken
-          return fixer.removeRange [
-            beforeToken.range[1]
-            importSpecifier.range[1]
-          ]
-
-        removeBracesAndPrecedingComma = ->
-          openingBrace = sourceCode.getTokenBefore importSpecifier,
-            filter: ({value}) -> value is '{'
-          closingBrace = sourceCode.getTokenAfter importSpecifier,
-            filter: ({value}) -> value is '}'
-          precedingComma = sourceCode.getTokenBefore openingBrace
-          # assert(precedingComma.value === ',')
-          beforeToken = sourceCode.getTokenBefore precedingComma
-          return fixer.removeRange [beforeToken.range[1], closingBrace.range[1]]
-          # followingComma = sourceCode.getTokenAfter(closingBrace)
-
-        return removeEntireImport() if importDeclaration.specifiers.length is 1
-
-        nextToken = sourceCode.getTokenAfter importSpecifier
-        return removeThroughFollowingComma commaToken: nextToken if (
-          nextToken.value is ','
-        )
-
-        precedingToken = sourceCode.getTokenBefore importSpecifier
-        return removeThroughPrecedingComma commaToken: precedingToken if (
-          precedingToken.value is ','
-        )
-
-        isOnlyNamedImport =
-          importSpecifier.type is 'ImportSpecifier' and
-          importDeclaration.specifiers.filter(({type}) ->
-            type is 'ImportSpecifier'
-          ).length is 1
-        return removeBracesAndPrecedingComma() if isOnlyNamedImport
-        fixer.remove importSpecifier
-
     # --------------------------------------------------------------------------
     # Public
     # --------------------------------------------------------------------------
@@ -621,4 +546,8 @@ module.exports =
             else
               getDefinedMessage unusedVar
             data: unusedVar
-            fix: getFix {unusedVar, context}
+            fix: getRemoveImportFix {
+              unusedVar
+              context
+              onlyRemoveKnownImports: config.onlyRemoveKnownImports
+            }

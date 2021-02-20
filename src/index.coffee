@@ -2,7 +2,7 @@ module.exports =
   rules:
     'no-undef': require './rules/no-undef'
     'jsx-no-undef': require './rules/jsx-no-undef'
-    'no-unused-vars': require './rules/no-unused-vars'
+    'no-unused-vars': require './rules/no-unused-vars-typescript'
     'react-in-jsx-scope': require './rules/react-in-jsx-scope'
     'no-undef-types': require './rules/no-undef-types'
   configs:

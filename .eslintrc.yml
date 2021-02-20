@@ -3,6 +3,7 @@ plugins:
   - coffee
 extends:
   - eslint:recommended
+  - plugin:coffee/disable-incompatible
   - plugin:coffee/all
   - plugin:coffee/prettier-run-as-rule
 rules:
@@ -40,6 +41,9 @@ rules:
   default-case: off
   coffee/id-length: off
   coffee/complexity: off
+  coffee/no-underscore-dangle: off
+  coffee/valid-jsdoc: off
+  coffee/spaced-comment: off
 env:
   node: true
   es6: true
