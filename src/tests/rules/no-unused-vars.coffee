@@ -10,7 +10,7 @@
 #------------------------------------------------------------------------------
 
 eslint = require 'eslint'
-rule = require '../../rules/no-unused-vars'
+rule = require '../../rules/no-unused-vars-typescript'
 {RuleTester} = eslint
 
 #------------------------------------------------------------------------------
@@ -36,214 +36,214 @@ definedError = (varName, type) ->
 ruleTester.run 'no-unused-vars', rule,
   valid: [code: 'export var foo = 123;']
   invalid: [
-    code: """
+    code: '''
       import x from "y";
       export const a = 1;
-    """
-    output: """
+    '''
+    output: '''
       export const a = 1;
-    """
+    '''
     errors: [definedError 'x']
     options: [onlyRemoveKnownImports: no]
   ,
-    code: """
+    code: '''
       import {x} from "y";
       export const a = 1;
-    """
-    output: """
+    '''
+    output: '''
       export const a = 1;
-    """
+    '''
     errors: [definedError 'x']
     options: [onlyRemoveKnownImports: no]
   ,
-    code: """
+    code: '''
       import {x} from "y";
 
       // leading comment
       export const a = 1;
-    """
-    output: """
+    '''
+    output: '''
       // leading comment
       export const a = 1;
-    """
+    '''
     errors: [definedError 'x']
     options: [onlyRemoveKnownImports: no]
   ,
-    code: """
+    code: '''
       import {x, y} from "y";
       export {y};
-    """
-    output: """
+    '''
+    output: '''
       import {y} from "y";
       export {y};
-    """
+    '''
     errors: [definedError 'x']
     options: [onlyRemoveKnownImports: no]
   ,
-    code: """
+    code: '''
       import {w, x, y} from "y";
       export {w, y};
-    """
-    output: """
+    '''
+    output: '''
       import {w, y} from "y";
       export {w, y};
-    """
+    '''
     errors: [definedError 'x']
     options: [onlyRemoveKnownImports: no]
   ,
-    code: """
+    code: '''
       import {w, x} from "y";
       export {w};
-    """
-    output: """
+    '''
+    output: '''
       import {w} from \"y\";
       export {w};
-    """
+    '''
     errors: [definedError 'x']
     options: [onlyRemoveKnownImports: no]
   ,
-    code: """
+    code: '''
       import x, {w} from "y";
       export {w};
-    """
-    output: """
+    '''
+    output: '''
       import {w} from "y";
       export {w};
-    """
+    '''
     errors: [definedError 'x']
     options: [onlyRemoveKnownImports: no]
   ,
-    code: """
+    code: '''
       import w, {x} from "y";
       export {w};
-    """
-    output: """
+    '''
+    output: '''
       import w from "y";
       export {w};
-    """
+    '''
     errors: [definedError 'x']
     options: [onlyRemoveKnownImports: no]
   ,
-    code: """
+    code: '''
       import w, {y as x} from "y";
       export {w};
-    """
-    output: """
+    '''
+    output: '''
       import w from "y";
       export {w};
-    """
+    '''
     errors: [definedError 'x']
     options: [onlyRemoveKnownImports: no]
   ,
-    code: """
+    code: '''
       import {w, y as x, z} from \"y\";
       export {w, z};
-    """
-    output: """
+    '''
+    output: '''
       import {w, z} from "y";
       export {w, z};
-    """
+    '''
     errors: [definedError 'x']
     options: [onlyRemoveKnownImports: no]
   ,
-    code: """
+    code: '''
       import {y as x, z} from "y";
       export {z};
-    """
-    output: """
+    '''
+    output: '''
       import {z} from "y";
       export {z};
-    """
+    '''
     errors: [definedError 'x']
     options: [onlyRemoveKnownImports: no]
   ,
-    code: """
+    code: '''
       import {y as x, z} from "y";
       export {z};
-    """
-    output: """
+    '''
+    output: '''
       import {z} from "y";
       export {z};
-    """
+    '''
     errors: [definedError 'x']
     options: [onlyRemoveKnownImports: no]
   ,
-    code: """
+    code: '''
       import {w, y as x} from "y";
       export {w};
-    """
-    output: """
+    '''
+    output: '''
       import {w} from "y";
       export {w};
-    """
+    '''
     errors: [definedError 'x']
     options: [onlyRemoveKnownImports: no]
   ,
-    code: """
+    code: '''
       import * as y from "y";
       const w = 3;
       export {w};
-    """
-    output: """
+    '''
+    output: '''
       const w = 3;
       export {w};
-    """
+    '''
     errors: [definedError 'y']
     options: [onlyRemoveKnownImports: no]
   ,
-    code: """
+    code: '''
       import View from "react-native";
       export const a = 1;
-    """
-    output: """
+    '''
+    output: '''
       export const a = 1;
-    """
+    '''
     errors: [definedError 'View']
     options: [onlyRemoveKnownImports: yes]
   ,
-    code: """
+    code: '''
       import x from "y";
       export const a = 1;
-    """
-    output: """
+    '''
+    output: '''
       import x from "y";
       export const a = 1;
-    """
+    '''
     errors: [definedError 'x']
     options: [onlyRemoveKnownImports: yes]
   ,
-    code: """
+    code: '''
       import {map as fmap} from "lodash/fp";
       export const a = 1;
-    """
-    output: """
+    '''
+    output: '''
       export const a = 1;
-    """
+    '''
     errors: [definedError 'fmap']
     options: [onlyRemoveKnownImports: yes]
   ,
     # respect knownImportsFile config
-    code: """
+    code: '''
       import numeral from "numeral";
       export const a = 1;
-    """
-    output: """
+    '''
+    output: '''
       import numeral from "numeral";
       export const a = 1;
-    """
+    '''
     errors: [definedError 'numeral']
     options: [onlyRemoveKnownImports: yes]
     settings:
       'known-imports/config-file-path': 'other-known-imports.json'
   ,
     # respect inline knownImports
-    code: """
+    code: '''
       import numeral from "numeral";
       export const a = 1;
-    """
-    output: """
+    '''
+    output: '''
       export const a = 1;
-    """
+    '''
     errors: [definedError 'numeral']
     options: [onlyRemoveKnownImports: yes]
     settings:
@@ -254,57 +254,57 @@ ruleTester.run 'no-unused-vars', rule,
           default: yes
   ,
     # preserve blank line
-    code: """
+    code: '''
       import b from "b";
       import c from "c";
 
       import someLocalDependency from "../somewhere";
 
       export const a = b + someLocalDependency;
-    """
-    output: """
+    '''
+    output: '''
       import b from "b";
 
       import someLocalDependency from "../somewhere";
 
       export const a = b + someLocalDependency;
-    """
+    '''
     errors: [definedError 'c']
   ,
     # ...but not at the beginning of the file
-    code: """
+    code: '''
       import c from "c";
 
       import someLocalDependency from "../somewhere";
 
       export const a = someLocalDependency;
-    """
-    output: """
+    '''
+    output: '''
       import someLocalDependency from "../somewhere";
 
       export const a = someLocalDependency;
-    """
+    '''
     errors: [definedError 'c']
   ,
     # onlyRemoveKnownImports understands whitelist filename
-    code: """
+    code: '''
       import Empty from "fixtures/Empty";
       export const a = 1;
-    """
-    output: """
+    '''
+    output: '''
       export const a = 1;
-    """
+    '''
     errors: [definedError 'Empty']
     options: [onlyRemoveKnownImports: yes]
   ,
     # onlyRemoveKnownImports understands whitelist named
-    code: """
+    code: '''
       import {one} from "fixtures/named";
       export const a = 1;
-    """
-    output: """
+    '''
+    output: '''
       export const a = 1;
-    """
+    '''
     errors: [definedError 'one']
     options: [onlyRemoveKnownImports: yes]
   ]
