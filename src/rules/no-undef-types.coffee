@@ -30,6 +30,10 @@ BUILTIN_UTILITY_TYPES = [
   'ThisParameterType'
   'OmitThisParameter'
   'ThisType'
+  'Uppercase'
+  'Lowercase'
+  'Capitalize'
+  'Uncapitalize'
 ]
 
 BUILTIN_ES5_TYPES = [
