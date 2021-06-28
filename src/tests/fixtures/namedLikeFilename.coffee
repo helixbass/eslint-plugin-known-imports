@@ -1,0 +1,1 @@
+export namedLikeFilename = -> 1

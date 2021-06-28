@@ -582,4 +582,19 @@ ruleTester.run 'no-undef', rule,
       type: 'Identifier'
     ]
     filename: 'lib/foo.js'
+  ,
+    # ignore option: filename import + leading-slash directory glob + non-nested import
+    code: '''
+      namedLikeFilename()
+    '''
+    output: '''
+      import {namedLikeFilename} from 'fixtures/namedLikeFilename'
+
+      namedLikeFilename()
+    '''
+    errors: [
+      message: "'namedLikeFilename' is not defined."
+      type: 'Identifier'
+    ]
+    filename: 'lib/foo.js'
   ]
