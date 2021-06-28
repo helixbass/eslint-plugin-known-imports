@@ -583,7 +583,7 @@ ruleTester.run 'no-undef', rule,
     ]
     filename: 'lib/foo.js'
   ,
-    # ignore option: filename import + leading-slash directory glob + non-nested import
+    # same-name named vs filename
     code: '''
       namedLikeFilename()
     '''
