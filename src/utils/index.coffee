@@ -181,27 +181,31 @@ createDirectoryCache = ({
         continue if ignoreMatcher relativePathWithExtension
         {dir: dirName, name, ext} = pathModule.parse relativePathWithExtension
         prefixRelativePath = "#{normalizePath dirName}#{name}"
+        exports = getExportMap {
+          path: fullPath
+          context
+        }
         if 'filename' in allowed
-          continue unless ext in extensions
-          appendToCacheKey(
-            cache
-            if settings['known-imports/case-insensitive-whitelist-filename']
-              name.toLowerCase()
-            else
-              name
-          ,
-            {
-              prefixRelativePath
-              fullPath
-              type: 'filename'
-            }
-          )
+          # eslint-disable-next-line coffee/no-loop-func
+          do ->
+            return unless ext in extensions
+            if exports?
+              return unless exports.namespace.has 'default'
+            appendToCacheKey(
+              cache
+              if settings['known-imports/case-insensitive-whitelist-filename']
+                name.toLowerCase()
+              else
+                name
+            ,
+              {
+                prefixRelativePath
+                fullPath
+                type: 'filename'
+              }
+            )
 
         if 'named' in allowed
-          exports = getExportMap {
-            path: fullPath
-            context
-          }
           if exports?
             for namedExport from exports.namespace.keys() when (
               namedExport isnt 'default'
@@ -314,6 +318,13 @@ findKnownImportInDirectory = ({
       foundExact
     else
       foundCaseInsensitive
+    # closestFirst =
+    #   sortBy((match) ->
+    #     [
+    #       if match.type is 'named' then 'A' else 'B'
+    #       getDotsPrefixLength match
+    #     ]
+    #   ) ambiguousMatches
     closestFirst = sortBy(getDotsPrefixLength) ambiguousMatches
     shortestDotsPrefixLength = getDotsPrefixLength closestFirst[0]
     haveSameSharedParentDirectory =
