@@ -597,4 +597,34 @@ ruleTester.run 'no-undef', rule,
       type: 'Identifier'
     ]
     filename: 'lib/foo.js'
+  ,
+    # index.js named
+    code: '''
+      fromIndex()
+    '''
+    output: '''
+      import {fromIndex} from 'fixtures/subdir'
+
+      fromIndex()
+    '''
+    errors: [
+      message: "'fromIndex' is not defined."
+      type: 'Identifier'
+    ]
+    filename: 'lib/foo.js'
+  ,
+    # index.js default
+    code: '''
+      subdir()
+    '''
+    output: '''
+      import subdir from 'fixtures/subdir'
+
+      subdir()
+    '''
+    errors: [
+      message: "'subdir' is not defined."
+      type: 'Identifier'
+    ]
+    filename: 'lib/foo.js'
   ]
