@@ -130,6 +130,28 @@ NON_ROOT_DIRECTORY_IGNORE_PATTERN_REGEX = ///
 getIsNonRootDirectoryPattern = (ignorePattern) ->
   NON_ROOT_DIRECTORY_IGNORE_PATTERN_REGEX.test ignorePattern
 
+INDEX_PATH_REGEX = ///
+  ^ (.+) / index $
+///
+stripIndex = (path) ->
+  match = INDEX_PATH_REGEX.exec path
+  return path unless match?
+  match[1]
+
+PARENT_DIRECTORY_NAME_REGEX = ///
+  (?:
+    ^ | /
+  )
+  (
+    [^/]+
+  )
+  $
+///
+getParentDirectoryName = (prefixRelativePath) ->
+  match = PARENT_DIRECTORY_NAME_REGEX.exec prefixRelativePath
+  return null unless match?
+  match[1]
+
 createDirectoryCache = ({
   directory
   recursive
@@ -180,11 +202,14 @@ createDirectoryCache = ({
       else
         continue if ignoreMatcher relativePathWithExtension
         {dir: dirName, name, ext} = pathModule.parse relativePathWithExtension
-        prefixRelativePath = "#{normalizePath dirName}#{name}"
+        prefixRelativePath = stripIndex "#{normalizePath dirName}#{name}"
         exports = getExportMap {
           path: fullPath
           context
         }
+        if name is 'index' and prefixRelativePath
+          name = getParentDirectoryName(prefixRelativePath) ? name
+          fullPath = fullPath.replace /// / index #{ext} $ ///, ''
         if 'filename' in allowed
           # eslint-disable-next-line coffee/no-loop-func
           do ->
