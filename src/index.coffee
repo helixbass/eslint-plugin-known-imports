@@ -30,5 +30,6 @@ module.exports =
         'no-undef': 'off'
         'known-imports/no-undef': 'error'
         'no-unused-vars': 'off'
+        '@typescript-eslint/no-unused-vars': 'off'
         'known-imports/no-unused-vars': 'error'
         'known-imports/no-undef-types': 'error'
