@@ -36,7 +36,7 @@
   },
   "dependencies": {
     "@typescript-eslint/eslint-plugin": "^5.55.0",
-    "@typescript-eslint/experimental-utils": "^5.55.0",
+    "@typescript-eslint/utils": "^5.55.0",
     "@typescript-eslint/scope-manager": "^5.55.0",
     "eslint-plugin-import": "^2.14.0",
     "eslint-plugin-react": "^7.10.0",
