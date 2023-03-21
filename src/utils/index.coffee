@@ -190,26 +190,39 @@ createDirectoryCache = ({
   ignoreMatcherContains = getIgnoreMatcher(
     shouldOnlyMatchNonRootDirectoryPatterns: yes
   )
+  console.log({directory})
   scanDir = (dir) ->
     dir = normalizePath dir
+    console.log({normalizedDir: dir})
     for file in fs.readdirSync dir
       fullPath = dir + file
-      relativePathWithExtension = fullPath.replace ///^#{directory}/?///, ''
+      console.log({file, fullPath})
+      # relativePathWithExtension = fullPath.replace ///^#{directory}/?///, ''
+      relativePathWithExtension =
+        if fullPath.startsWith "#{directory}#{pathModule.sep}"
+          fullPath.slice("#{directory}#{pathModule.sep}".length)
+        else if fullPath.startsWith "#{directory}"
+          fullPath.slice(directory.length)
+        else
+          fullPath
+      relativePathWithExtensionUnix = toUnixPathSeparators(relativePathWithExtension)
+      console.log({relativePathWithExtension, relativePathWithExtensionUnix})
       if fs.statSync(fullPath).isDirectory()
-        continue if ignoreMatcherNoBasename relativePathWithExtension
-        continue if ignoreMatcherContains relativePathWithExtension
+        continue if ignoreMatcherNoBasename relativePathWithExtensionUnix
+        continue if ignoreMatcherContains relativePathWithExtensionUnix
         scanDir fullPath if recursive
       else
-        continue if ignoreMatcher relativePathWithExtension
+        continue if ignoreMatcher relativePathWithExtensionUnix
         {dir: dirName, name, ext} = pathModule.parse relativePathWithExtension
-        prefixRelativePath = stripIndex "#{normalizePath dirName}#{name}"
+        prefixRelativePath = stripIndex "#{normalizePathUnix(toUnixPathSeparators(dirName))}#{name}"
+        console.log({prefixRelativePath})
         exports = getExportMap {
           path: fullPath
           context
         }
         if name is 'index' and prefixRelativePath
           name = getParentDirectoryName(prefixRelativePath) ? name
-          fullPath = fullPath.replace /// / index #{ext} $ ///, ''
+          fullPath = fullPath.replace /// #{PATH_SEP_IN_REGEX} index #{ext} $ ///, ''
         if 'filename' in allowed
           # eslint-disable-next-line coffee/no-loop-func
           do ->
@@ -265,7 +278,18 @@ updateDirectoryCache = ({
   } unless isFresh {cache: directoryCache, settings}
   directoryCache.value
 
+PATH_SEP_IN_REGEX =
+  if pathModule.sep is '/'
+    '/'
+  else
+    '\\\\'
 normalizePath = (path) ->
+  return path unless path
+  path = path.replace('/', pathModule.sep)
+  return path if /// #{PATH_SEP_IN_REGEX} $ ///.test path
+  "#{path}#{pathModule.sep}"
+
+normalizePathUnix = (path) ->
   return path unless path
   return path if /// / $ ///.test path
   "#{path}/"
@@ -283,6 +307,12 @@ ensureLeadingDot = (path) ->
   return "./#{path}" if path.length and not startsWith path, '.'
   path
 
+toOsPathSeparators = (path) ->
+  path.replace(/// / ///g, pathModule.sep)
+
+toUnixPathSeparators = (path) ->
+  path.replace(///[/\\]///g, '/')
+
 findKnownImportInDirectory = ({
   directory
   allowed = ['filename']
@@ -295,9 +325,13 @@ findKnownImportInDirectory = ({
   projectRootDir
   ignore
 }) ->
+  directory = toOsPathSeparators(directory)
+  console.log({pre: directory})
   directory = pathModule.join projectRootDir, directory if projectRootDir?
+  console.log({joined: directory})
   directory = normalizePath directory
-  prefix = normalizePath prefix
+  console.log({norm: directory})
+  prefix = normalizePathUnix prefix
   directoryCache = updateDirectoryCache {
     directory
     recursive
@@ -333,7 +367,7 @@ findKnownImportInDirectory = ({
       ^
       (
         (?:
-          \.\./
+          \.\.#{PATH_SEP_IN_REGEX}
         ) *
       )
     ///.exec getRelativePath match
@@ -360,8 +394,8 @@ findKnownImportInDirectory = ({
       sortBy((match) ->
         getRelativePath(match).replace(
           ///
-          /
-          [^/] +
+          #{PATH_SEP_IN_REGEX}
+          [^#{PATH_SEP_IN_REGEX}] +
           $
         ///
           ''
@@ -376,7 +410,7 @@ findKnownImportInDirectory = ({
   importPath = if settings['known-imports/relative-paths']
     relativePath = getRelativePath found
     extension = pathModule.extname relativePath
-    ensureLeadingDot(
+    relativePathWithoutExtension =
       if extension in extensions
         pathModule.join(
           pathModule.dirname relativePath
@@ -384,6 +418,11 @@ findKnownImportInDirectory = ({
         )
       else
         relativePath
+    console.log({relativePathWithoutExtension})
+    ensureLeadingDot(
+      toUnixPathSeparators(
+        relativePathWithoutExtension
+      )
     )
   else
     "#{prefix}#{prefixRelativePath}"
