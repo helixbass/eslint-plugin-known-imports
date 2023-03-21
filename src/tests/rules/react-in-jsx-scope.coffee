@@ -60,12 +60,24 @@ ruleTester.run 'react-in-jsx-scope', rule,
     errors: [message: "'React' must be in scope when using JSX"]
   ,
     code: 'var a = <App />;'
+    output: """
+      import React from 'react'
+      var a = <App />;
+    """
     errors: [message: "'React' must be in scope when using JSX"]
   ,
     code: 'var a = <img />;'
+    output: """
+      import React from 'react'
+      var a = <img />;
+    """
     errors: [message: "'React' must be in scope when using JSX"]
   ,
     code: '/** @jsx React.DOM */ var a = <img />;'
+    output: """
+      /** @jsx React.DOM */ import React from 'react'
+      var a = <img />;
+    """
     errors: [message: "'React' must be in scope when using JSX"]
   ,
     code: '/** @jsx Foo.bar */ var React, a = <img />;'

@@ -1,5 +1,5 @@
-{AST_NODE_TYPES, TSESLint} = require '@typescript-eslint/experimental-utils'
 {PatternVisitor} = require '@typescript-eslint/scope-manager'
+{AST_NODE_TYPES, TSESLint} = require '@typescript-eslint/utils'
 util = require '@typescript-eslint/eslint-plugin/dist/util'
 {getRemoveImportFix} = require '../utils'
 
@@ -9,7 +9,6 @@ module.exports = util.createRule(
     type: 'problem'
     docs:
       description: 'Disallow unused variables'
-      category: 'Variables'
       recommended: 'warn'
       extendsBaseRule: yes
     schema: [
@@ -32,6 +31,8 @@ module.exports = util.createRule(
             enum: ['all', 'none']
           caughtErrorsIgnorePattern:
             type: 'string'
+          destructuredArrayIgnorePattern:
+            type: 'string'
           onlyRemoveKnownImports:
             type: 'boolean'
         additionalProperties: no
@@ -41,55 +42,10 @@ module.exports = util.createRule(
       unusedVar: "'{{varName}}' is {{action}} but never used{{additional}}."
     fixable: 'code'
   defaultOptions: [{}]
-  create: (context) ->
+  create: (context, [firstOption]) ->
     filename = context.getFilename()
     sourceCode = context.getSourceCode()
     MODULE_DECL_CACHE = new Map()
-
-    checkModuleDeclForExportEquals = (node) ->
-      cached = MODULE_DECL_CACHE.get node
-      return cached if cached?
-
-      for statement from node.body?.body ? []
-        if statement.type is AST_NODE_TYPES.TSExportAssignment
-          MODULE_DECL_CACHE.set node, yes
-          return yes
-
-      MODULE_DECL_CACHE.set node, no
-      no
-
-    markDeclarationChildAsUsed = (node) ->
-      identifiers = []
-      switch node.type
-        when AST_NODE_TYPES.TSInterfaceDeclaration, AST_NODE_TYPES.TSTypeAliasDeclaration, AST_NODE_TYPES.ClassDeclaration, AST_NODE_TYPES.FunctionDeclaration, AST_NODE_TYPES.TSDeclareFunction, AST_NODE_TYPES.TSEnumDeclaration, AST_NODE_TYPES.TSModuleDeclaration
-          if node.id?.type is AST_NODE_TYPES.Identifier
-            identifiers.push node.id
-
-        when AST_NODE_TYPES.VariableDeclaration
-          for declaration from node.declarations
-            visitPattern declaration, (pattern) ->
-              identifiers.push pattern
-              undefined
-
-      scope = context.getScope()
-      shouldUseUpperScope = [
-        AST_NODE_TYPES.TSModuleDeclaration
-        AST_NODE_TYPES.TSDeclareFunction
-      ].includes node.type
-
-      unless scope.variableScope is scope
-        scope = scope.variableScope
-      else if shouldUseUpperScope and scope.upper
-        scope = scope.upper
-
-      for id from identifiers
-        superVar = scope.set.get id.name
-        if superVar
-          superVar.eslintUsed = yes
-
-    visitPattern = (node, cb) ->
-      visitor = new PatternVisitor {}, node, cb
-      visitor.visit node
 
     options = do ->
       _options =
@@ -98,8 +54,6 @@ module.exports = util.createRule(
         ignoreRestSiblings: no
         caughtErrors: 'none'
         onlyRemoveKnownImports: no
-
-      firstOption = context.options[0]
 
       if firstOption
         if typeof firstOption is 'string'
@@ -131,6 +85,12 @@ module.exports = util.createRule(
               firstOption.caughtErrorsIgnorePattern
               'u'
             )
+
+          if firstOption.destructuredArrayIgnorePattern
+            _options.destructuredArrayIgnorePattern = new RegExp(
+              firstOption.destructuredArrayIgnorePattern
+              'u'
+            )
       _options
 
     collectUnusedVariables = ->
@@ -139,16 +99,21 @@ module.exports = util.createRule(
       # @param variable eslint-scope variable object.
       # @returns True if the variable is exported, false if not.
       ###
-      hasRestSpreadSibling = (variable) ->
-        return variable.defs.some((def) ->
-          propertyNode = def.name.parent
-          patternNode = propertyNode.parent
+      hasRestSibling = (node) ->
+        node.type is AST_NODE_TYPES.Property and
+        node.parent?.type is AST_NODE_TYPES.ObjectPattern and
+        node.parent.properties[node.parent.properties.length - 1].type is AST_NODE_TYPES.RestElement
 
-          propertyNode.type is AST_NODE_TYPES.Property and
-            patternNode.type is AST_NODE_TYPES.ObjectPattern and
-            patternNode.properties[patternNode.properties.length - 1].type is
-              AST_NODE_TYPES.RestElement
-        ) if options.ignoreRestSiblings
+      hasRestSpreadSibling = (variable) ->
+        if options.ignoreRestSiblings
+          hasRestSiblingDefinition = variable.defs.some((def) ->
+            hasRestSibling(def.name.parent)
+          )
+          hasRestSiblingReference = variable.references.some((ref) ->
+            hasRestSibling(ref.identifier.parent)
+          )
+
+          return hasRestSiblingDefinition or hasRestSiblingReference
 
         no
 
@@ -179,6 +144,18 @@ module.exports = util.createRule(
         continue if (
           variable.scope.type is TSESLint.Scope.ScopeType.global and
           options.vars is 'local'
+        )
+
+        refUsedInArrayPatterns = variable.references.some((ref) ->
+          ref.identifier.parent?.type is AST_NODE_TYPES.ArrayPattern
+        )
+
+        continue if (
+          (def.name.parent?.type is AST_NODE_TYPES.ArrayPattern or
+            refUsedInArrayPatterns
+          ) and
+          'name' of def.name and
+          options.destructuredArrayIgnorePattern?.test(def.name.name)
         )
 
         # skip catch variables
@@ -219,6 +196,19 @@ module.exports = util.createRule(
 
       unusedVariablesReturn
 
+    checkModuleDeclForExportEquals = (node) ->
+      cached = MODULE_DECL_CACHE.get node
+      return cached if cached?
+
+      if node.body && node.body.type is AST_NODE_TYPES.TSModuleBlock
+        for statement from node.body.body
+          if statement.type is AST_NODE_TYPES.TSExportAssignment
+            MODULE_DECL_CACHE.set node, yes
+            return yes
+
+      MODULE_DECL_CACHE.set node, no
+      no
+
     ambientDeclarationSelector = (parent, childDeclare) ->
       [
         # Types are ambiently exported
@@ -235,6 +225,39 @@ module.exports = util.createRule(
           AST_NODE_TYPES.VariableDeclaration
         ].join ', '})#{if childDeclare then '[declare = true]' else ''}"
       ].join ', '
+    markDeclarationChildAsUsed = (node) ->
+      identifiers = []
+      switch node.type
+        when AST_NODE_TYPES.TSInterfaceDeclaration, AST_NODE_TYPES.TSTypeAliasDeclaration, AST_NODE_TYPES.ClassDeclaration, AST_NODE_TYPES.FunctionDeclaration, AST_NODE_TYPES.TSDeclareFunction, AST_NODE_TYPES.TSEnumDeclaration, AST_NODE_TYPES.TSModuleDeclaration
+          if node.id?.type is AST_NODE_TYPES.Identifier
+            identifiers.push node.id
+
+        when AST_NODE_TYPES.VariableDeclaration
+          for declaration from node.declarations
+            visitPattern declaration, (pattern) ->
+              identifiers.push pattern
+              undefined
+
+      scope = context.getScope()
+      shouldUseUpperScope = [
+        AST_NODE_TYPES.TSModuleDeclaration
+        AST_NODE_TYPES.TSDeclareFunction
+      ].includes node.type
+
+      unless scope.variableScope is scope
+        scope = scope.variableScope
+      else if shouldUseUpperScope and scope.upper
+        scope = scope.upper
+
+      for id from identifiers
+        superVar = scope.set.get id.name
+        if superVar
+          superVar.eslintUsed = yes
+
+    visitPattern = (node, cb) ->
+      visitor = new PatternVisitor {}, node, cb
+      visitor.visit node
+
     return (
       # declaration file handling
 
@@ -242,6 +265,16 @@ module.exports = util.createRule(
         [ambientDeclarationSelector(AST_NODE_TYPES.Program, yes)]: (node) ->
           return unless util.isDefinitionFile filename
           markDeclarationChildAsUsed node
+          undefined
+
+        'TSModuleDeclaration > TSModuleDeclaration': (node) ->
+          if node.id.type is AST_NODE_TYPES.Identifier
+            scope = context.getScope()
+            if scope.upper
+              scope = scope.upper
+            superVar = scope.set.get(node.id.name)
+            if superVar
+              superVar.eslintUsed = true
           undefined
 
         # children of a namespace that is a child of a declared namespace are auto-exported
@@ -313,10 +346,13 @@ module.exports = util.createRule(
           # @returns The message data to be used with this unused variable.
           ###
           getAssignedMessageData = (unusedVar) ->
-            additional = if options.varsIgnorePattern
-              ". Allowed unused vars must match #{options.varsIgnorePattern.toString()}"
-            else
-              ''
+            def = unusedVar.defs[0]
+            additional = ''
+
+            if options.destructuredArrayIgnorePattern and def?.name.parent?.type is AST_NODE_TYPES.ArrayPattern
+              additional = ". Allowed unused elements of array destructuring patterns must match #{options.destructuredArrayIgnorePattern.toString()}"
+            else if options.varsIgnorePattern
+              additional = ". Allowed unused vars must match #{options.varsIgnorePattern.toString()}"
 
             {
               varName: unusedVar.name
@@ -329,9 +365,13 @@ module.exports = util.createRule(
           for unusedVar in unusedVars
             # Report the first declaration.
             if unusedVar.defs.length > 0
+              writeReferences = unusedVar.references.filter((ref) ->
+                ref.isWrite() and ref.from.variableScope is unusedVar.scope.variableScope
+              )
+
               context.report
-                node: if unusedVar.references.length
-                  unusedVar.references[unusedVar.references.length - 1]
+                node: if writeReferences.length
+                  writeReferences[writeReferences.length - 1]
                     .identifier
                 else
                   unusedVar.identifiers[0]

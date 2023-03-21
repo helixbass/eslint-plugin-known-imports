@@ -209,7 +209,8 @@ module.exports =
         allIdentifiersWhichAreTypeReferences
       ) when (
         not allIdentifiersBesidesTypeReferences[identifierName] and
-          not ALL_BUILTIN_TYPES_LOOKUP[identifierName]
+          not ALL_BUILTIN_TYPES_LOOKUP[identifierName] and
+          identifierName not in (context.settings['known-imports/global-types'] ? [])
       )
         context.report
           node: identifier
