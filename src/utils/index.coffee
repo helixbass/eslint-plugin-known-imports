@@ -190,13 +190,10 @@ createDirectoryCache = ({
   ignoreMatcherContains = getIgnoreMatcher(
     shouldOnlyMatchNonRootDirectoryPatterns: yes
   )
-  console.log({directory})
   scanDir = (dir) ->
     dir = normalizePath dir
-    console.log({normalizedDir: dir})
     for file in fs.readdirSync dir
       fullPath = dir + file
-      console.log({file, fullPath})
       # relativePathWithExtension = fullPath.replace ///^#{directory}/?///, ''
       relativePathWithExtension =
         if fullPath.startsWith "#{directory}#{pathModule.sep}"
@@ -206,7 +203,6 @@ createDirectoryCache = ({
         else
           fullPath
       relativePathWithExtensionUnix = toUnixPathSeparators(relativePathWithExtension)
-      console.log({relativePathWithExtension, relativePathWithExtensionUnix})
       if fs.statSync(fullPath).isDirectory()
         continue if ignoreMatcherNoBasename relativePathWithExtensionUnix
         continue if ignoreMatcherContains relativePathWithExtensionUnix
@@ -215,7 +211,6 @@ createDirectoryCache = ({
         continue if ignoreMatcher relativePathWithExtensionUnix
         {dir: dirName, name, ext} = pathModule.parse relativePathWithExtension
         prefixRelativePath = stripIndex "#{normalizePathUnix(toUnixPathSeparators(dirName))}#{name}"
-        console.log({prefixRelativePath})
         exports = getExportMap {
           path: fullPath
           context
@@ -326,11 +321,8 @@ findKnownImportInDirectory = ({
   ignore
 }) ->
   directory = toOsPathSeparators(directory)
-  console.log({pre: directory})
   directory = pathModule.join projectRootDir, directory if projectRootDir?
-  console.log({joined: directory})
   directory = normalizePath directory
-  console.log({norm: directory})
   prefix = normalizePathUnix prefix
   directoryCache = updateDirectoryCache {
     directory
@@ -418,7 +410,6 @@ findKnownImportInDirectory = ({
         )
       else
         relativePath
-    console.log({relativePathWithoutExtension})
     ensureLeadingDot(
       toUnixPathSeparators(
         relativePathWithoutExtension
