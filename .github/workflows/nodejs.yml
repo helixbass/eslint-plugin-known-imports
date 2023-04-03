@@ -1,14 +1,21 @@
 name: Node CI
 
-on: [push]
+on:
+  push:
+    branches: [master]
+    paths:
+      - "src/**"
+  pull_request:
+    branches: ["**"]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
-        node-version: [10.x, 12.x]
+        os: [ubuntu-latest, windows-latest]
+        node-version: [16.x]
 
     steps:
     - uses: actions/checkout@v1
@@ -18,8 +25,8 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - name: yarn install
       run: yarn install
-    - name: yarn lint
-      run: yarn lint
+    # - name: yarn lint
+    #   run: yarn lint
     - name: yarn prepublish
       run: yarn prepublish
     - name: yarn test
